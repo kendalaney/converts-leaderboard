@@ -1,0 +1,40 @@
+name: Refresh leaderboard
+
+on:
+  schedule:
+    - cron: "0 */3 * * *"   # every 3 hours (UTC)
+  workflow_dispatch:          # allow manual "Run workflow" from the Actions tab
+
+permissions:
+  contents: write
+
+concurrency:
+  group: refresh-leaderboard
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Pull Notion & rebuild index.html
+        env:
+          NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
+        run: python3 build/build_ci.py
+
+      - name: Commit & push if changed
+        run: |
+          git config user.name "leaderboard-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add index.html
+          if git diff --cached --quiet; then
+            echo "No data change — nothing to publish."
+          else
+            git commit -m "Auto-refresh leaderboard ($(date -u +%Y-%m-%dT%H:%MZ))"
+            git push
+          fi

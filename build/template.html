@@ -1,0 +1,482 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Creator Leaderboard</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  :root{
+    --bg:#ECEEF2; --surface:#FFFFFF; --surface-2:#F5F6F9; --surface-3:#EAEDF2;
+    --border:#DCE0E8; --border-2:#CDD3DD;
+    --text:#161A21; --text-dim:#5A6474; --text-faint:#8A93A2;
+    --gold:#B4831F; --gold-bg:#FBF2DA; --gold-line:#E7CE93;
+    --silver:#6E7987; --silver-bg:#EDEFF3;
+    --bronze:#9C5F2E; --bronze-bg:#F6E9DD;
+    --pos:#178A57; --accent:#2E6FB6; --accent-bg:#E7F0FA;
+    --bar:#C6CDD8; --bar-lead:#D8B45A;
+    --shadow:0 1px 2px rgba(20,26,36,.06),0 6px 20px rgba(20,26,36,.06);
+    --shadow-lg:0 2px 6px rgba(20,26,36,.08),0 18px 44px rgba(20,26,36,.12);
+    --mono:ui-monospace,"SF Mono",SFMono-Regular,Menlo,Consolas,monospace;
+    --sans:"Helvetica Neue","Arial Nova",Arial,system-ui,-apple-system,sans-serif;
+  }
+  @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+    --bg:#0D1015; --surface:#151A22; --surface-2:#1A2029; --surface-3:#20283340;
+    --border:#262E3A; --border-2:#333D4C;
+    --text:#EAEEF4; --text-dim:#98A2B2; --text-faint:#6C7686;
+    --gold:#F2C14E; --gold-bg:#241E10; --gold-line:#5A481F;
+    --silver:#C2CAD4; --silver-bg:#1B2029;
+    --bronze:#D08A4E; --bronze-bg:#241A11;
+    --pos:#38D08A; --accent:#5AA2EC; --accent-bg:#13202E;
+    --bar:#2A3340; --bar-lead:#7A5E23;
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px rgba(0,0,0,.35);
+    --shadow-lg:0 2px 8px rgba(0,0,0,.5),0 22px 50px rgba(0,0,0,.5);
+  }}
+  :root[data-theme="dark"]{
+    --bg:#0D1015; --surface:#151A22; --surface-2:#1A2029; --surface-3:#20283340;
+    --border:#262E3A; --border-2:#333D4C;
+    --text:#EAEEF4; --text-dim:#98A2B2; --text-faint:#6C7686;
+    --gold:#F2C14E; --gold-bg:#241E10; --gold-line:#5A481F;
+    --silver:#C2CAD4; --silver-bg:#1B2029;
+    --bronze:#D08A4E; --bronze-bg:#241A11;
+    --pos:#38D08A; --accent:#5AA2EC; --accent-bg:#13202E;
+    --bar:#2A3340; --bar-lead:#7A5E23;
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px rgba(0,0,0,.35);
+    --shadow-lg:0 2px 8px rgba(0,0,0,.5),0 22px 50px rgba(0,0,0,.5);
+  }
+
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{margin:0;background:var(--bg);color:var(--text);font-family:var(--sans);line-height:1.5;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+  .wrap{max-width:1140px;margin:0 auto;padding:26px 18px 80px}
+  .tnum{font-variant-numeric:tabular-nums}
+  a{color:var(--accent);text-decoration:none}
+  a:hover{text-decoration:underline}
+  button{font-family:inherit}
+  :focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:6px}
+
+  .masthead{display:flex;flex-wrap:wrap;align-items:flex-end;gap:16px 24px;justify-content:space-between;margin-bottom:6px}
+  .brand{display:flex;flex-direction:column;gap:8px}
+  .eyebrow{font-family:var(--mono);font-size:11.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);font-weight:600;display:flex;align-items:center;gap:8px}
+  .eyebrow::before{content:"";width:22px;height:2px;background:var(--gold);display:inline-block}
+  h1{margin:0;font-size:clamp(30px,5.2vw,50px);font-weight:800;letter-spacing:-.026em;line-height:.98;text-wrap:balance}
+  .sub{color:var(--text-dim);font-size:14.5px;max-width:64ch}
+  .theme-toggle{display:inline-flex;align-items:center;gap:7px;background:var(--surface);border:1px solid var(--border);color:var(--text-dim);padding:8px 12px;border-radius:999px;font-size:12.5px;cursor:pointer;font-weight:600}
+  .theme-toggle:hover{border-color:var(--border-2);color:var(--text)}
+
+  /* window toggle */
+  .winbar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:20px 0 2px}
+  .winlabel{font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--text-faint)}
+  .segmented{display:inline-flex;background:var(--surface-2);border:1px solid var(--border);border-radius:12px;padding:4px;gap:2px}
+  .segmented button{border:0;background:transparent;color:var(--text-dim);padding:9px 17px;border-radius:9px;font-size:13px;font-weight:700;cursor:pointer;font-variant-numeric:tabular-nums;white-space:nowrap}
+  .segmented button:hover{color:var(--text)}
+  .segmented button[aria-selected="true"]{background:var(--surface);color:var(--gold);box-shadow:var(--shadow)}
+
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:16px 0 6px}
+  .stat{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:13px 15px;box-shadow:var(--shadow)}
+  .stat .k{font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--text-faint)}
+  .stat .v{font-size:24px;font-weight:800;letter-spacing:-.02em;margin-top:3px}
+  .stat .v small{font-size:13px;font-weight:600;color:var(--text-dim);letter-spacing:0}
+
+  /* division bar */
+  .divbar{display:flex;gap:8px;overflow-x:auto;padding:8px 2px 12px;margin-top:8px;scrollbar-width:thin}
+  .divbar::-webkit-scrollbar{height:6px}
+  .divbar::-webkit-scrollbar-thumb{background:var(--border-2);border-radius:3px}
+  .divpill{flex:none;display:inline-flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--border);border-radius:999px;padding:9px 14px;font-size:13px;font-weight:700;color:var(--text-dim);cursor:pointer;transition:border-color .15s,color .15s}
+  .divpill:hover{border-color:var(--border-2);color:var(--text)}
+  .divpill[aria-selected="true"]{background:var(--text);color:var(--bg);border-color:var(--text)}
+  .divpill .emo{font-size:14px;line-height:1}
+  .divpill .cnt{font-family:var(--mono);font-size:11px;background:var(--surface-2);color:var(--text-dim);border-radius:999px;padding:1px 7px;min-width:20px;text-align:center}
+  .divpill[aria-selected="true"] .cnt{background:var(--surface);color:var(--text)}
+
+  .section-label{display:flex;align-items:center;gap:12px;margin:12px 0 14px}
+  .section-label h2{margin:0;font-size:13px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--text-dim);display:flex;align-items:center;gap:8px;white-space:nowrap}
+  .section-label h2 .scope{color:var(--gold)}
+  .section-label .line{flex:1;height:1px;background:var(--border)}
+  .section-label .hint{font-family:var(--mono);font-size:11px;color:var(--text-faint);white-space:nowrap}
+
+  .podium{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;align-items:stretch}
+  .pod{position:relative;background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:20px 18px 18px;box-shadow:var(--shadow);overflow:hidden;display:flex;flex-direction:column;gap:12px}
+  .pod.g1{border-color:var(--gold-line);background:linear-gradient(180deg,var(--gold-bg),var(--surface) 62%)}
+  .pod.g3{border-color:var(--bronze-bg)}
+  .pod .crown{position:absolute;top:14px;right:16px;font-size:22px}
+  .medal{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;font-family:var(--mono);font-weight:700;font-size:15px;flex:none}
+  .m1{background:var(--gold);color:#231a05}.m2{background:var(--silver);color:#1c222b}.m3{background:var(--bronze);color:#231204}
+  .pod .who{display:flex;align-items:center;gap:11px}
+  .pod .handle{font-weight:800;font-size:16px;letter-spacing:-.01em;word-break:break-word}
+  .pod .rankword{font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--text-faint)}
+  .pod .bigviews{font-size:34px;font-weight:800;letter-spacing:-.03em;line-height:1}
+  .pod .bigviews span{font-size:13px;font-weight:600;color:var(--text-dim);letter-spacing:0;margin-left:5px}
+  .pod .podmeta{display:flex;gap:14px;flex-wrap:wrap;margin-top:auto;padding-top:8px;border-top:1px solid var(--border)}
+  .pod .pm{display:flex;flex-direction:column;gap:1px}
+  .pod .pm b{font-size:14px;font-weight:700;font-family:var(--mono)}
+  .pod .pm i{font-size:10px;font-style:normal;letter-spacing:.08em;text-transform:uppercase;color:var(--text-faint)}
+  .pod .podtitle{font-size:12.5px;color:var(--text-dim);line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .pod .divtag{font-family:var(--mono);font-size:9.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--text-dim);background:var(--surface-2);border:1px solid var(--border);padding:2px 7px;border-radius:999px;align-self:flex-start}
+
+  .toolbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;margin:14px 0 12px}
+  .tabs{display:inline-flex;background:var(--surface-2);border:1px solid var(--border);border-radius:11px;padding:3px}
+  .tab{border:0;background:transparent;color:var(--text-dim);padding:7px 16px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer}
+  .tab[aria-selected="true"]{background:var(--surface);color:var(--text);box-shadow:var(--shadow)}
+  .rightctl{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+  .search{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:9px 13px 9px 32px;font-size:13.5px;color:var(--text);min-width:230px;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='15' height='15' viewBox='0 0 24 24' fill='none' stroke='%238A93A2' stroke-width='2.2' stroke-linecap='round'><circle cx='11' cy='11' r='7'/><line x1='21' y1='21' x2='16.5' y2='16.5'/></svg>");background-repeat:no-repeat;background-position:11px center}
+  .search:focus{outline:none;border-color:var(--accent)}
+  .sortsel{display:inline-flex;align-items:center;gap:8px;font-size:12.5px;color:var(--text-dim)}
+  .sortsel label{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--text-faint)}
+  select.srt{appearance:none;background:var(--surface);border:1px solid var(--border);color:var(--text);border-radius:10px;padding:9px 30px 9px 12px;font-size:13px;font-weight:600;cursor:pointer;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%238A93A2' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>");background-repeat:no-repeat;background-position:right 9px center}
+
+  .board{display:flex;flex-direction:column;gap:7px}
+  .colhead{display:grid;grid-template-columns:52px 1fr 118px 92px 78px;gap:12px;padding:4px 16px;align-items:center}
+  .colhead span{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--text-faint)}
+  .colhead .r{text-align:right}
+  .row{background:var(--surface);border:1px solid var(--border);border-radius:13px;box-shadow:var(--shadow);overflow:hidden;transition:border-color .15s}
+  .row:hover{border-color:var(--border-2)}
+  .row.lead{border-color:var(--gold-line)}
+  .rowmain{display:grid;grid-template-columns:52px 1fr 118px 92px 78px;gap:12px;align-items:center;padding:13px 16px;cursor:pointer;position:relative}
+  .rank{font-family:var(--mono);font-weight:700;font-size:17px;color:var(--text-dim);text-align:center}
+  .row.lead .rank{color:var(--gold)}
+  .rank.top3{color:var(--text)}
+  .vid{min-width:0}
+  .vid .h{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+  .vid .handle{font-weight:700;font-size:14.5px;letter-spacing:-.01em}
+  .fmt{font-family:var(--mono);font-size:9.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--text-dim);background:var(--surface-2);border:1px solid var(--border);padding:2px 7px;border-radius:999px}
+  .vid .t{font-size:12.5px;color:var(--text-dim);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .views-cell{text-align:right}
+  .views-cell b{font-size:16px;font-weight:800;letter-spacing:-.02em}
+  .barwrap{height:4px;background:var(--bar);border-radius:3px;margin-top:5px;overflow:hidden}
+  .barfill{height:100%;background:var(--accent);border-radius:3px}
+  .row.lead .barfill{background:var(--bar-lead)}
+  .metric{text-align:right;font-family:var(--mono);font-weight:600}
+  .metric.big{font-size:15px}
+  .metric.sm{font-size:13px;color:var(--text-dim)}
+  .metric .lab{display:block;font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--text-faint);margin-top:2px;font-family:var(--sans);font-weight:600}
+  .otag{display:inline-block;padding:1px 6px;border-radius:6px;font-size:13px}
+  .otag.hot{background:var(--gold-bg);color:var(--gold)}
+  .chev{position:absolute;right:12px;bottom:9px;color:var(--text-faint);transition:transform .2s;display:none}
+
+  .detail{display:grid;grid-template-rows:0fr;transition:grid-template-rows .26s ease}
+  .row.open .detail{grid-template-rows:1fr}
+  .detail-inner{overflow:hidden;min-height:0}
+  .row.open{box-shadow:var(--shadow-lg)}
+  .dpad{padding:4px 16px 18px;border-top:1px solid var(--border);margin-top:2px}
+  .dgrid{display:grid;grid-template-columns:1fr 1fr;gap:16px 22px;margin-top:14px}
+  @media(max-width:640px){.dgrid{grid-template-columns:1fr}}
+  .block .blab{font-family:var(--mono);font-size:10px;letter-spacing:.13em;text-transform:uppercase;color:var(--gold);font-weight:600;margin-bottom:6px;display:flex;align-items:center;gap:7px}
+  .block p{margin:0;font-size:13.5px;color:var(--text);line-height:1.62}
+  .block p.empty{color:var(--text-faint);font-style:italic}
+  .hookbox{background:var(--surface-2);border:1px solid var(--border);border-left:3px solid var(--gold);border-radius:8px;padding:11px 13px}
+  .hookbox p{font-size:14px;font-weight:600}
+  .transcript{background:var(--surface-2);border:1px solid var(--border);border-radius:8px;padding:12px 14px;max-height:230px;overflow:auto}
+  .transcript p{font-size:13px;line-height:1.7;white-space:pre-wrap}
+  .dmetrics{grid-column:1/-1;display:grid;grid-template-columns:repeat(auto-fit,minmax(96px,1fr));gap:9px;margin-top:2px}
+  .dm{background:var(--surface-2);border:1px solid var(--border);border-radius:10px;padding:10px 12px}
+  .dm b{font-size:16px;font-weight:800;font-family:var(--mono);letter-spacing:-.01em}
+  .dm i{display:block;font-size:9.5px;font-style:normal;letter-spacing:.09em;text-transform:uppercase;color:var(--text-faint);margin-top:2px;font-weight:600}
+  .dlinks{grid-column:1/-1;display:flex;gap:10px;flex-wrap:wrap;margin-top:2px}
+  .lk{display:inline-flex;align-items:center;gap:7px;padding:9px 15px;border-radius:10px;font-size:13px;font-weight:700;border:1px solid var(--border)}
+  .lk.watch{background:var(--accent);color:#fff;border-color:transparent}
+  .lk.watch:hover{text-decoration:none;filter:brightness(1.06)}
+  .lk.audio{background:var(--surface-2);color:var(--text)}
+  .lk.audio:hover{text-decoration:none;border-color:var(--border-2)}
+  .triggers{display:flex;gap:6px;flex-wrap:wrap;margin-top:4px}
+  .trg{font-size:11px;font-weight:600;color:var(--accent);background:var(--accent-bg);border:1px solid transparent;padding:2px 9px;border-radius:999px}
+
+  .empty-state{text-align:center;padding:46px 20px;background:var(--surface);border:1px dashed var(--border-2);border-radius:16px;color:var(--text-dim)}
+  .empty-state .big{font-size:30px;margin-bottom:8px}
+  .empty-state h3{margin:0 0 4px;font-size:16px;color:var(--text)}
+  .empty-state p{margin:0;font-size:13.5px}
+
+  .creators{display:flex;flex-direction:column;gap:7px}
+  .crow{display:grid;grid-template-columns:52px 1fr 120px 82px 92px;gap:12px;align-items:center;background:var(--surface);border:1px solid var(--border);border-radius:13px;padding:14px 16px;box-shadow:var(--shadow)}
+  .crow.lead{border-color:var(--gold-line)}
+  .crow .cviews b{font-size:17px;font-weight:800;letter-spacing:-.02em}
+  @media(max-width:680px){.crow{grid-template-columns:42px 1fr 92px;row-gap:8px}.crow .c-hide{display:none}}
+
+  footer{margin-top:40px;padding-top:18px;border-top:1px solid var(--border);color:var(--text-faint);font-size:12px;display:flex;flex-wrap:wrap;gap:6px 18px;justify-content:space-between}
+  footer .mono{font-family:var(--mono)}
+
+  @media(max-width:720px){
+    .stats{grid-template-columns:repeat(2,1fr)}
+    .podium{grid-template-columns:1fr}
+    .colhead{display:none}
+    .rowmain{grid-template-columns:40px 1fr auto;gap:10px;row-gap:6px;padding-bottom:20px}
+    .rowmain .metric.big,.rowmain .metric.sm{display:none}
+    .views-cell{grid-column:3}
+    .chev{display:block}
+    .vid .t{white-space:normal;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+  }
+  @media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+
+</head>
+<body>
+<div class="wrap">
+  <header class="masthead">
+    <div class="brand">
+      <div class="eyebrow">CONVERTS&trade; System &middot; Client Standings</div>
+      <h1>The Creator Leaderboard</h1>
+      <div class="sub" id="sub"></div>
+    </div>
+    <button class="theme-toggle" id="themeBtn" type="button" aria-label="Toggle color theme">
+      <span id="themeIcon">◐</span><span id="themeLabel">Theme</span>
+    </button>
+  </header>
+
+  <div class="winbar">
+    <span class="winlabel">Time window</span>
+    <div class="segmented" id="winToggle" role="tablist" aria-label="Time window">
+      <button role="tab" data-days="7">7 days</button>
+      <button role="tab" data-days="30">30 days</button>
+      <button role="tab" data-days="90">90 days</button>
+      <button role="tab" data-days="365">365 days</button>
+    </div>
+  </div>
+
+  <div class="stats" id="stats"></div>
+
+  <div class="divbar" id="divbar" role="tablist" aria-label="Divisions"></div>
+
+  <div class="section-label">
+    <h2>🏆 On the Podium <span class="scope" id="podScope"></span></h2><div class="line"></div>
+    <span class="hint">Ranked by views</span>
+  </div>
+  <div id="podium"></div>
+
+  <div class="toolbar">
+    <div class="tabs" role="tablist" aria-label="Leaderboard view">
+      <button class="tab" role="tab" id="tab-videos" aria-selected="true" data-view="videos">Top Videos</button>
+      <button class="tab" role="tab" id="tab-creators" aria-selected="false" data-view="creators">Creator Standings</button>
+    </div>
+    <div class="rightctl">
+      <input class="search" id="search" type="search" placeholder="Search handle or hook" aria-label="Search videos">
+      <div class="sortsel">
+        <label for="sort">Sort</label>
+        <select class="srt" id="sort" aria-label="Sort by">
+          <option value="views">Views</option>
+          <option value="outlier">Outlier Score</option>
+          <option value="comments">Comments</option>
+          <option value="likes">Likes</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <div id="videosView"><div id="board" class="board"></div></div>
+  <div id="creatorsView" hidden><div class="creators" id="creators"></div></div>
+
+  <footer>
+    <span>Data: CONVERTS&trade; Client Data &middot; <span class="mono" id="period"></span></span>
+    <span class="mono" id="snapshot"></span>
+  </footer>
+</div>
+
+<script>
+const DATA = __DATA__;
+const SNAPSHOT_DATE = "__SNAPDATE__";
+const _SI = "__SNAPSHOT_ISO__".split("-").map(Number);
+const SNAP = new Date(_SI[0], _SI[1]-1, _SI[2]);
+
+const DIVISIONS = [
+  {id:"all",          label:"All Divisions", emoji:"🏆"},
+  {id:"broll",        label:"B-Roll",        emoji:"🎬"},
+  {id:"talking_head", label:"Talking Head",  emoji:"🎙️"},
+  {id:"green_screen", label:"Green Screen",  emoji:"🟩"},
+  {id:"reaction",     label:"Reaction",      emoji:"💬"},
+  {id:"carousel",     label:"Carousel",      emoji:"🖼️"},
+];
+const DIV_LABEL = Object.fromEntries(DIVISIONS.map(d=>[d.id,d.label]));
+
+const $ = s => document.querySelector(s);
+const nf = n => (n==null?"—":n.toLocaleString("en-US"));
+const compact = n => { if(n==null) return "—"; if(n>=1e6) return (n/1e6).toFixed(n>=1e7?0:1)+"M"; if(n>=1e3) return (n/1e3).toFixed(n>=1e4?0:1)+"K"; return String(n); };
+const esc = s => (s||"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const fmtOutlier = o => o>=100? Math.round(o).toLocaleString() : o>=10? o.toFixed(1) : o.toFixed(2);
+const fmtDate = d => { const [y,m,day]=d.split("-"); return new Date(y,m-1,day).toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"}); };
+const daysAgo = d => { const [y,m,day]=d.split("-").map(Number); return (SNAP-new Date(y,m-1,day))/86400000; };
+
+let state = { view:"videos", sort:"views", q:"", division:"all", days:30 };
+const maxViewsAll = Math.max(...DATA.map(d=>d.views));
+
+const inWindow = d => daysAgo(d.posted) <= state.days + 0.5;
+const inDivision = d => state.division==="all" || d.division===state.division;
+function currentPool(){ return DATA.filter(d=>inWindow(d)&&inDivision(d)); }
+function rankPool(pool){ pool.slice().sort((a,b)=>b.views-a.views).forEach((d,i)=>d._rank=i+1); }
+
+/* ---------- header ---------- */
+function windowLabel(){ return state.days===365?"last 365 days":`last ${state.days} days`; }
+function renderHeaderStatic(){
+  const champ = DATA.slice().sort((a,b)=>b.views-a.views)[0];
+  $("#sub").innerHTML = `Head-to-head standings for every client video — overall and by content division. Filter the window, pick a division, and climb. <b>Take the crown.</b>`;
+  $("#snapshot").textContent = "Snapshot: "+SNAPSHOT_DATE;
+}
+function renderStats(pool){
+  const creators = new Set(pool.map(d=>d.handle)).size;
+  const totalViews = pool.reduce((a,d)=>a+d.views,0);
+  const champ = pool.slice().sort((a,b)=>b.views-a.views)[0];
+  const stats = [
+    {k:"Videos in play", v:pool.length},
+    {k:"Creators competing", v:creators},
+    {k:"Combined views", v:compact(totalViews)},
+    {k:(state.division==="all"?"Top score":DIV_LABEL[state.division]+" #1"), v:champ?compact(champ.views):"—", s:champ?"@"+champ.handle:""},
+  ];
+  $("#stats").innerHTML = stats.map(s=>`<div class="stat"><div class="k">${s.k}</div><div class="v tnum">${s.v}${s.s?` <small>${esc(s.s)}</small>`:""}</div></div>`).join("");
+  const dates = pool.map(d=>d.posted).sort();
+  $("#period").textContent = dates.length? (fmtDate(dates[0])+" – "+fmtDate(dates[dates.length-1])) : windowLabel();
+}
+
+/* ---------- division bar ---------- */
+function renderDivbar(){
+  const winPool = DATA.filter(inWindow);
+  const counts = {};
+  winPool.forEach(d=>counts[d.division]=(counts[d.division]||0)+1);
+  const extra = [...new Set(winPool.map(d=>d.division))].filter(id=>!DIV_LABEL[id]); // e.g. "other"
+  const divs = extra.length? DIVISIONS.concat(extra.map(id=>({id,label:id[0].toUpperCase()+id.slice(1),emoji:"🎞️"}))) : DIVISIONS;
+  $("#divbar").innerHTML = divs.map(dv=>{
+    const c = dv.id==="all"? winPool.length : (counts[dv.id]||0);
+    const sel = state.division===dv.id;
+    return `<button class="divpill" role="tab" aria-selected="${sel}" data-div="${dv.id}"><span class="emo">${dv.emoji}</span>${esc(dv.label)}<span class="cnt tnum">${c}</span></button>`;
+  }).join("");
+  document.querySelectorAll(".divpill").forEach(p=>p.addEventListener("click",()=>{ state.division=p.dataset.div; renderAll(); }));
+}
+
+/* ---------- podium ---------- */
+function renderPodium(pool){
+  $("#podScope").textContent = (state.division==="all"?"Overall":DIV_LABEL[state.division])+" · "+windowLabel();
+  const top = pool.slice().sort((a,b)=>b.views-a.views).slice(0,3);
+  if(!top.length){
+    $("#podium").innerHTML = `<div class="empty-state"><div class="big">👑</div><h3>No entries in this division yet</h3><p>First creator to post ${state.division==="all"?"":`a ${DIV_LABEL[state.division]} video `}in the ${windowLabel()} claims the crown.</p></div>`;
+    return;
+  }
+  $("#podium").innerHTML = `<div class="podium">`+top.map((d,i)=>{
+    const rankword=["Champion","Runner-up","Third place"][i];
+    return `<div class="pod g${i+1}">
+      ${i===0?'<div class="crown">👑</div>':''}
+      <div class="who"><div class="medal m${i+1}">${i+1}</div>
+        <div><div class="rankword">${rankword}</div><div class="handle">@${esc(d.handle)}</div></div></div>
+      <div class="bigviews tnum">${nf(d.views)}<span>views</span></div>
+      ${state.division==="all"?`<div class="divtag">${esc(DIV_LABEL[d.division]||d.division)}</div>`:''}
+      <div class="podtitle">${esc(d.title)||"—"}</div>
+      <div class="podmeta">
+        <div class="pm"><b class="tnum">${fmtOutlier(d.outlier)}×</b><i>Outlier</i></div>
+        <div class="pm"><b class="tnum">${nf(d.comments)}</b><i>Comments</i></div>
+        <div class="pm"><b class="tnum">${nf(d.likes)}</b><i>Likes</i></div>
+      </div></div>`;
+  }).join("")+`</div>`;
+}
+
+/* ---------- videos board ---------- */
+function triggerTags(t){ if(!t||!t.length) return ""; return `<div class="triggers">${t.map(x=>`<span class="trg">${esc(x)}</span>`).join("")}</div>`; }
+function renderBoard(pool){
+  const board=$("#board");
+  if(!pool.length){ board.innerHTML=`<div class="empty-state"><div class="big">🏁</div><h3>Division open</h3><p>No videos here yet in the ${windowLabel()}. Be the first on the board.</p></div>`; return; }
+  const q=state.q.trim().toLowerCase();
+  let rows=pool.filter(d=> !q || d.handle.toLowerCase().includes(q) || (d.hook||"").toLowerCase().includes(q) || (d.title||"").toLowerCase().includes(q));
+  rows.sort((a,b)=>(b[state.sort]||0)-(a[state.sort]||0));
+  if(!rows.length){ board.innerHTML=`<div class="empty-state"><div class="big">🔍</div><h3>No matches</h3><p>Nothing matches “${esc(state.q)}” in this view.</p></div>`; return; }
+  const maxV = Math.max(...pool.map(d=>d.views));
+  board.innerHTML = rows.map(d=>{
+    const isLead = d._rank===1;
+    const barW = Math.max(2, Math.sqrt(d.views/maxV)*100);
+    const hot = d.outlier>=3;
+    return `<div class="row${isLead?' lead':''}">
+      <div class="rowmain" role="button" tabindex="0" aria-expanded="false">
+        <div class="rank${d._rank<=3?' top3':''} tnum">${d._rank}</div>
+        <div class="vid">
+          <div class="h"><span class="handle">@${esc(d.handle)}</span>${d.style?`<span class="fmt">${esc(d.style)}</span>`:''}</div>
+          <div class="t">${esc(d.title)||esc(d.hook)||"Untitled"}</div>
+          <div class="barwrap"><div class="barfill" style="width:${barW}%"></div></div>
+        </div>
+        <div class="views-cell"><b class="tnum">${nf(d.views)}</b></div>
+        <div class="metric big"><span class="otag${hot?' hot':''} tnum">${fmtOutlier(d.outlier)}×</span><span class="lab">Outlier</span></div>
+        <div class="metric sm"><span class="tnum">${nf(d.comments)}</span><span class="lab">Comments</span></div>
+        <svg class="chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+      </div>
+      <div class="detail"><div class="detail-inner"><div class="dpad">
+        ${triggerTags(d.trigger)}
+        <div class="dgrid">
+          <div class="block"><div class="blab">🎣 The Hook</div><div class="hookbox"><p class="${d.hook?'':'empty'}">${d.hook?esc(d.hook):"No hook recorded"}</p></div></div>
+          <div class="block"><div class="blab">📝 Transcript</div>${d.transcript?`<div class="transcript"><p>${esc(d.transcript)}</p></div>`:`<div class="hookbox"><p class="empty">Transcript not available${d.caption?" — see caption below":""}</p></div>`}</div>
+          ${d.caption?`<div class="block" style="grid-column:1/-1"><div class="blab">💬 Caption</div><div class="transcript" style="max-height:150px"><p>${esc(d.caption)}</p></div></div>`:''}
+          <div class="dmetrics">
+            <div class="dm"><b class="tnum">${nf(d.views)}</b><i>Views</i></div>
+            <div class="dm"><b class="tnum">${fmtOutlier(d.outlier)}×</b><i>Outlier Score</i></div>
+            <div class="dm"><b class="tnum">${nf(d.comments)}</b><i>Comments</i></div>
+            <div class="dm"><b class="tnum">${nf(d.likes)}</b><i>Likes</i></div>
+            <div class="dm"><b class="tnum">${nf(d.followers)}</b><i>Followers</i></div>
+            <div class="dm"><b>${fmtDate(d.posted)}</b><i>Posted</i></div>
+          </div>
+          <div class="dlinks">
+            ${d.video_url?`<a class="lk watch" href="${esc(d.video_url)}" target="_blank" rel="noopener">▶ Watch video</a>`:''}
+            ${d.audio_url?`<a class="lk audio" href="${esc(d.audio_url)}" target="_blank" rel="noopener">♪ The audio</a>`:''}
+          </div>
+        </div>
+      </div></div></div>
+    </div>`;
+  }).join("");
+  bindRows();
+}
+function bindRows(){
+  document.querySelectorAll(".row").forEach(row=>{
+    const main=row.querySelector(".rowmain");
+    const toggle=()=>{ const open=row.classList.toggle("open"); main.setAttribute("aria-expanded",open); main.querySelector(".chev").style.transform=open?"rotate(180deg)":""; };
+    main.addEventListener("click",toggle);
+    main.addEventListener("keydown",e=>{ if(e.key==="Enter"||e.key===" "){e.preventDefault();toggle();}});
+  });
+}
+
+/* ---------- creators ---------- */
+function renderCreators(pool){
+  const box=$("#creators");
+  if(!pool.length){ box.innerHTML=`<div class="empty-state"><div class="big">🏁</div><h3>No creators yet</h3><p>No entries in this division for the ${windowLabel()}.</p></div>`; return; }
+  const map={};
+  pool.forEach(d=>{
+    const m=map[d.handle]||(map[d.handle]={handle:d.handle,videos:0,views:0,best:0,bestOut:0,followers:d.followers});
+    m.videos++; m.views+=d.views; m.best=Math.max(m.best,d.views); m.bestOut=Math.max(m.bestOut,d.outlier); m.followers=Math.max(m.followers,d.followers);
+  });
+  const list=Object.values(map).sort((a,b)=>b.views-a.views);
+  box.innerHTML = `<div class="colhead" style="grid-template-columns:52px 1fr 120px 82px 92px"><span>Rank</span><span>Creator</span><span class="r">Total views</span><span class="r">Videos</span><span class="r">Best outlier</span></div>`+
+  list.map((c,i)=>`<div class="crow${i===0?' lead':''}">
+      <div class="rank${i<3?' top3':''} tnum">${i+1}</div>
+      <div><div class="handle" style="font-weight:800;font-size:15px">@${esc(c.handle)}</div>
+        <div class="t" style="font-size:12px;color:var(--text-dim);margin-top:2px">${nf(c.followers)} followers · best video ${nf(c.best)} views</div></div>
+      <div class="cviews views-cell"><b class="tnum">${nf(c.views)}</b></div>
+      <div class="metric sm c-hide tnum" style="text-align:right">${c.videos}</div>
+      <div class="metric big c-hide" style="text-align:right"><span class="otag${c.bestOut>=3?' hot':''} tnum">${fmtOutlier(c.bestOut)}×</span></div>
+    </div>`).join("");
+}
+
+/* ---------- orchestration ---------- */
+function renderAll(){
+  const pool=currentPool(); rankPool(pool);
+  document.querySelectorAll(".divpill").forEach(p=>p.setAttribute("aria-selected",String(p.dataset.div===state.division)));
+  document.querySelectorAll("#winToggle button").forEach(b=>b.setAttribute("aria-selected",String(+b.dataset.days===state.days)));
+  renderStats(pool); renderDivbar(); renderPodium(pool); renderBoard(pool); renderCreators(pool);
+}
+function switchView(v){
+  state.view=v;
+  document.querySelectorAll(".tab").forEach(t=>t.setAttribute("aria-selected",String(t.dataset.view===v)));
+  $("#videosView").hidden = v!=="videos"; $("#creatorsView").hidden = v!=="creators";
+  $(".rightctl").style.visibility = v==="videos"?"visible":"hidden";
+}
+
+/* ---------- theme ---------- */
+function initTheme(){
+  const btn=$("#themeBtn");
+  const apply=t=>{ if(t==="system")document.documentElement.removeAttribute("data-theme"); else document.documentElement.setAttribute("data-theme",t);
+    const dark = t==="dark" || (t==="system" && matchMedia("(prefers-color-scheme:dark)").matches);
+    $("#themeIcon").textContent = dark?"☾":"☀"; $("#themeLabel").textContent = t.charAt(0).toUpperCase()+t.slice(1); };
+  let cur="system"; apply(cur);
+  btn.addEventListener("click",()=>{ cur = cur==="system"?"light":cur==="light"?"dark":"system"; apply(cur); });
+  matchMedia("(prefers-color-scheme:dark)").addEventListener("change",()=>{ if(cur==="system") apply("system"); });
+}
+
+/* ---------- wire ---------- */
+initTheme();
+renderHeaderStatic();
+renderAll();
+$("#winToggle").addEventListener("click",e=>{ const b=e.target.closest("button"); if(!b) return; state.days=+b.dataset.days; renderAll(); });
+$("#search").addEventListener("input",e=>{ state.q=e.target.value; renderBoard(currentPool()); });
+$("#sort").addEventListener("change",e=>{ state.sort=e.target.value; const p=currentPool(); rankPool(p); renderBoard(p); });
+document.querySelectorAll(".tab").forEach(t=>t.addEventListener("click",()=>switchView(t.dataset.view)));
+</script>
+</body>
+</html>
