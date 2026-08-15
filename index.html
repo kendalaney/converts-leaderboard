@@ -1,0 +1,1708 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Creator Leaderboard</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  :root{
+    --bg:#ECEEF2; --surface:#FFFFFF; --surface-2:#F5F6F9; --surface-3:#EAEDF2;
+    --border:#DCE0E8; --border-2:#CDD3DD;
+    --text:#161A21; --text-dim:#5A6474; --text-faint:#8A93A2;
+    --gold:#B4831F; --gold-bg:#FBF2DA; --gold-line:#E7CE93;
+    --silver:#6E7987; --silver-bg:#EDEFF3;
+    --bronze:#9C5F2E; --bronze-bg:#F6E9DD;
+    --pos:#178A57; --accent:#2E6FB6; --accent-bg:#E7F0FA;
+    --bar:#C6CDD8; --bar-lead:#D8B45A;
+    --shadow:0 1px 2px rgba(20,26,36,.06),0 6px 20px rgba(20,26,36,.06);
+    --shadow-lg:0 2px 6px rgba(20,26,36,.08),0 18px 44px rgba(20,26,36,.12);
+    --mono:ui-monospace,"SF Mono",SFMono-Regular,Menlo,Consolas,monospace;
+    --sans:"Helvetica Neue","Arial Nova",Arial,system-ui,-apple-system,sans-serif;
+  }
+  @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+    --bg:#0D1015; --surface:#151A22; --surface-2:#1A2029; --surface-3:#20283340;
+    --border:#262E3A; --border-2:#333D4C;
+    --text:#EAEEF4; --text-dim:#98A2B2; --text-faint:#6C7686;
+    --gold:#F2C14E; --gold-bg:#241E10; --gold-line:#5A481F;
+    --silver:#C2CAD4; --silver-bg:#1B2029;
+    --bronze:#D08A4E; --bronze-bg:#241A11;
+    --pos:#38D08A; --accent:#5AA2EC; --accent-bg:#13202E;
+    --bar:#2A3340; --bar-lead:#7A5E23;
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px rgba(0,0,0,.35);
+    --shadow-lg:0 2px 8px rgba(0,0,0,.5),0 22px 50px rgba(0,0,0,.5);
+  }}
+  :root[data-theme="dark"]{
+    --bg:#0D1015; --surface:#151A22; --surface-2:#1A2029; --surface-3:#20283340;
+    --border:#262E3A; --border-2:#333D4C;
+    --text:#EAEEF4; --text-dim:#98A2B2; --text-faint:#6C7686;
+    --gold:#F2C14E; --gold-bg:#241E10; --gold-line:#5A481F;
+    --silver:#C2CAD4; --silver-bg:#1B2029;
+    --bronze:#D08A4E; --bronze-bg:#241A11;
+    --pos:#38D08A; --accent:#5AA2EC; --accent-bg:#13202E;
+    --bar:#2A3340; --bar-lead:#7A5E23;
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px rgba(0,0,0,.35);
+    --shadow-lg:0 2px 8px rgba(0,0,0,.5),0 22px 50px rgba(0,0,0,.5);
+  }
+
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{margin:0;background:var(--bg);color:var(--text);font-family:var(--sans);line-height:1.5;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+  .wrap{max-width:1140px;margin:0 auto;padding:26px 18px 80px}
+  .tnum{font-variant-numeric:tabular-nums}
+  a{color:var(--accent);text-decoration:none}
+  a:hover{text-decoration:underline}
+  button{font-family:inherit}
+  :focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:6px}
+
+  .masthead{display:flex;flex-wrap:wrap;align-items:flex-end;gap:16px 24px;justify-content:space-between;margin-bottom:6px}
+  .brand{display:flex;flex-direction:column;gap:8px}
+  .eyebrow{font-family:var(--mono);font-size:11.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);font-weight:600;display:flex;align-items:center;gap:8px}
+  .eyebrow::before{content:"";width:22px;height:2px;background:var(--gold);display:inline-block}
+  h1{margin:0;font-size:clamp(30px,5.2vw,50px);font-weight:800;letter-spacing:-.026em;line-height:.98;text-wrap:balance}
+  .sub{color:var(--text-dim);font-size:14.5px;max-width:64ch}
+  .theme-toggle{display:inline-flex;align-items:center;gap:7px;background:var(--surface);border:1px solid var(--border);color:var(--text-dim);padding:8px 12px;border-radius:999px;font-size:12.5px;cursor:pointer;font-weight:600}
+  .theme-toggle:hover{border-color:var(--border-2);color:var(--text)}
+
+  /* window toggle */
+  .winbar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:20px 0 2px}
+  .winlabel{font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--text-faint)}
+  .segmented{display:inline-flex;background:var(--surface-2);border:1px solid var(--border);border-radius:12px;padding:4px;gap:2px}
+  .segmented button{border:0;background:transparent;color:var(--text-dim);padding:9px 17px;border-radius:9px;font-size:13px;font-weight:700;cursor:pointer;font-variant-numeric:tabular-nums;white-space:nowrap}
+  .segmented button:hover{color:var(--text)}
+  .segmented button[aria-selected="true"]{background:var(--surface);color:var(--gold);box-shadow:var(--shadow)}
+
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:16px 0 6px}
+  .stat{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:13px 15px;box-shadow:var(--shadow)}
+  .stat .k{font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--text-faint)}
+  .stat .v{font-size:24px;font-weight:800;letter-spacing:-.02em;margin-top:3px}
+  .stat .v small{font-size:13px;font-weight:600;color:var(--text-dim);letter-spacing:0}
+
+  /* division bar */
+  .divbar{display:flex;gap:8px;overflow-x:auto;padding:8px 2px 12px;margin-top:8px;scrollbar-width:thin}
+  .divbar::-webkit-scrollbar{height:6px}
+  .divbar::-webkit-scrollbar-thumb{background:var(--border-2);border-radius:3px}
+  .divpill{flex:none;display:inline-flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--border);border-radius:999px;padding:9px 14px;font-size:13px;font-weight:700;color:var(--text-dim);cursor:pointer;transition:border-color .15s,color .15s}
+  .divpill:hover{border-color:var(--border-2);color:var(--text)}
+  .divpill[aria-selected="true"]{background:var(--text);color:var(--bg);border-color:var(--text)}
+  .divpill .emo{font-size:14px;line-height:1}
+  .divpill .cnt{font-family:var(--mono);font-size:11px;background:var(--surface-2);color:var(--text-dim);border-radius:999px;padding:1px 7px;min-width:20px;text-align:center}
+  .divpill[aria-selected="true"] .cnt{background:var(--surface);color:var(--text)}
+
+  .section-label{display:flex;align-items:center;gap:12px;margin:12px 0 14px}
+  .section-label h2{margin:0;font-size:13px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--text-dim);display:flex;align-items:center;gap:8px;white-space:nowrap}
+  .section-label h2 .scope{color:var(--gold)}
+  .section-label .line{flex:1;height:1px;background:var(--border)}
+  .section-label .hint{font-family:var(--mono);font-size:11px;color:var(--text-faint);white-space:nowrap}
+
+  .podium{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;align-items:stretch}
+  .pod{position:relative;background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:20px 18px 18px;box-shadow:var(--shadow);overflow:hidden;display:flex;flex-direction:column;gap:12px}
+  .pod.g1{border-color:var(--gold-line);background:linear-gradient(180deg,var(--gold-bg),var(--surface) 62%)}
+  .pod.g3{border-color:var(--bronze-bg)}
+  .pod .crown{position:absolute;top:14px;right:16px;font-size:22px}
+  .medal{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;font-family:var(--mono);font-weight:700;font-size:15px;flex:none}
+  .m1{background:var(--gold);color:#231a05}.m2{background:var(--silver);color:#1c222b}.m3{background:var(--bronze);color:#231204}
+  .pod .who{display:flex;align-items:center;gap:11px}
+  .pod .handle{font-weight:800;font-size:16px;letter-spacing:-.01em;word-break:break-word}
+  .pod .rankword{font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--text-faint)}
+  .pod .bigviews{font-size:34px;font-weight:800;letter-spacing:-.03em;line-height:1}
+  .pod .bigviews span{font-size:13px;font-weight:600;color:var(--text-dim);letter-spacing:0;margin-left:5px}
+  .pod .podmeta{display:flex;gap:14px;flex-wrap:wrap;margin-top:auto;padding-top:8px;border-top:1px solid var(--border)}
+  .pod .pm{display:flex;flex-direction:column;gap:1px}
+  .pod .pm b{font-size:14px;font-weight:700;font-family:var(--mono)}
+  .pod .pm i{font-size:10px;font-style:normal;letter-spacing:.08em;text-transform:uppercase;color:var(--text-faint)}
+  .pod .podtitle{font-size:12.5px;color:var(--text-dim);line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .pod .divtag{font-family:var(--mono);font-size:9.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--text-dim);background:var(--surface-2);border:1px solid var(--border);padding:2px 7px;border-radius:999px;align-self:flex-start}
+
+  .toolbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;margin:14px 0 12px}
+  .tabs{display:inline-flex;background:var(--surface-2);border:1px solid var(--border);border-radius:11px;padding:3px}
+  .tab{border:0;background:transparent;color:var(--text-dim);padding:7px 16px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer}
+  .tab[aria-selected="true"]{background:var(--surface);color:var(--text);box-shadow:var(--shadow)}
+  .rightctl{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+  .search{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:9px 13px 9px 32px;font-size:13.5px;color:var(--text);min-width:230px;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='15' height='15' viewBox='0 0 24 24' fill='none' stroke='%238A93A2' stroke-width='2.2' stroke-linecap='round'><circle cx='11' cy='11' r='7'/><line x1='21' y1='21' x2='16.5' y2='16.5'/></svg>");background-repeat:no-repeat;background-position:11px center}
+  .search:focus{outline:none;border-color:var(--accent)}
+  .sortsel{display:inline-flex;align-items:center;gap:8px;font-size:12.5px;color:var(--text-dim)}
+  .sortsel label{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--text-faint)}
+  select.srt{appearance:none;background:var(--surface);border:1px solid var(--border);color:var(--text);border-radius:10px;padding:9px 30px 9px 12px;font-size:13px;font-weight:600;cursor:pointer;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%238A93A2' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>");background-repeat:no-repeat;background-position:right 9px center}
+
+  .board{display:flex;flex-direction:column;gap:7px}
+  .colhead{display:grid;grid-template-columns:52px 1fr 118px 92px 78px;gap:12px;padding:4px 16px;align-items:center}
+  .colhead span{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--text-faint)}
+  .colhead .r{text-align:right}
+  .row{background:var(--surface);border:1px solid var(--border);border-radius:13px;box-shadow:var(--shadow);overflow:hidden;transition:border-color .15s}
+  .row:hover{border-color:var(--border-2)}
+  .row.lead{border-color:var(--gold-line)}
+  .rowmain{display:grid;grid-template-columns:52px 1fr 118px 92px 78px;gap:12px;align-items:center;padding:13px 16px;cursor:pointer;position:relative}
+  .rank{font-family:var(--mono);font-weight:700;font-size:17px;color:var(--text-dim);text-align:center}
+  .row.lead .rank{color:var(--gold)}
+  .rank.top3{color:var(--text)}
+  .vid{min-width:0}
+  .vid .h{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+  .vid .handle{font-weight:700;font-size:14.5px;letter-spacing:-.01em}
+  .fmt{font-family:var(--mono);font-size:9.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--text-dim);background:var(--surface-2);border:1px solid var(--border);padding:2px 7px;border-radius:999px}
+  .vid .t{font-size:12.5px;color:var(--text-dim);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .views-cell{text-align:right}
+  .views-cell b{font-size:16px;font-weight:800;letter-spacing:-.02em}
+  .barwrap{height:4px;background:var(--bar);border-radius:3px;margin-top:5px;overflow:hidden}
+  .barfill{height:100%;background:var(--accent);border-radius:3px}
+  .row.lead .barfill{background:var(--bar-lead)}
+  .metric{text-align:right;font-family:var(--mono);font-weight:600}
+  .metric.big{font-size:15px}
+  .metric.sm{font-size:13px;color:var(--text-dim)}
+  .metric .lab{display:block;font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--text-faint);margin-top:2px;font-family:var(--sans);font-weight:600}
+  .otag{display:inline-block;padding:1px 6px;border-radius:6px;font-size:13px}
+  .otag.hot{background:var(--gold-bg);color:var(--gold)}
+  .chev{position:absolute;right:12px;bottom:9px;color:var(--text-faint);transition:transform .2s;display:none}
+
+  .detail{display:grid;grid-template-rows:0fr;transition:grid-template-rows .26s ease}
+  .row.open .detail{grid-template-rows:1fr}
+  .detail-inner{overflow:hidden;min-height:0}
+  .row.open{box-shadow:var(--shadow-lg)}
+  .dpad{padding:4px 16px 18px;border-top:1px solid var(--border);margin-top:2px}
+  .dgrid{display:grid;grid-template-columns:1fr 1fr;gap:16px 22px;margin-top:14px}
+  @media(max-width:640px){.dgrid{grid-template-columns:1fr}}
+  .block .blab{font-family:var(--mono);font-size:10px;letter-spacing:.13em;text-transform:uppercase;color:var(--gold);font-weight:600;margin-bottom:6px;display:flex;align-items:center;gap:7px}
+  .block p{margin:0;font-size:13.5px;color:var(--text);line-height:1.62}
+  .block p.empty{color:var(--text-faint);font-style:italic}
+  .hookbox{background:var(--surface-2);border:1px solid var(--border);border-left:3px solid var(--gold);border-radius:8px;padding:11px 13px}
+  .hookbox p{font-size:14px;font-weight:600}
+  .transcript{background:var(--surface-2);border:1px solid var(--border);border-radius:8px;padding:12px 14px;max-height:230px;overflow:auto}
+  .transcript p{font-size:13px;line-height:1.7;white-space:pre-wrap}
+  .dmetrics{grid-column:1/-1;display:grid;grid-template-columns:repeat(auto-fit,minmax(96px,1fr));gap:9px;margin-top:2px}
+  .dm{background:var(--surface-2);border:1px solid var(--border);border-radius:10px;padding:10px 12px}
+  .dm b{font-size:16px;font-weight:800;font-family:var(--mono);letter-spacing:-.01em}
+  .dm i{display:block;font-size:9.5px;font-style:normal;letter-spacing:.09em;text-transform:uppercase;color:var(--text-faint);margin-top:2px;font-weight:600}
+  .dlinks{grid-column:1/-1;display:flex;gap:10px;flex-wrap:wrap;margin-top:2px}
+  .lk{display:inline-flex;align-items:center;gap:7px;padding:9px 15px;border-radius:10px;font-size:13px;font-weight:700;border:1px solid var(--border)}
+  .lk.watch{background:var(--accent);color:#fff;border-color:transparent}
+  .lk.watch:hover{text-decoration:none;filter:brightness(1.06)}
+  .lk.audio{background:var(--surface-2);color:var(--text)}
+  .lk.audio:hover{text-decoration:none;border-color:var(--border-2)}
+  .triggers{display:flex;gap:6px;flex-wrap:wrap;margin-top:4px}
+  .trg{font-size:11px;font-weight:600;color:var(--accent);background:var(--accent-bg);border:1px solid transparent;padding:2px 9px;border-radius:999px}
+
+  .empty-state{text-align:center;padding:46px 20px;background:var(--surface);border:1px dashed var(--border-2);border-radius:16px;color:var(--text-dim)}
+  .empty-state .big{font-size:30px;margin-bottom:8px}
+  .empty-state h3{margin:0 0 4px;font-size:16px;color:var(--text)}
+  .empty-state p{margin:0;font-size:13.5px}
+
+  .creators{display:flex;flex-direction:column;gap:7px}
+  .crow{display:grid;grid-template-columns:52px 1fr 120px 82px 92px;gap:12px;align-items:center;background:var(--surface);border:1px solid var(--border);border-radius:13px;padding:14px 16px;box-shadow:var(--shadow)}
+  .crow.lead{border-color:var(--gold-line)}
+  .crow .cviews b{font-size:17px;font-weight:800;letter-spacing:-.02em}
+  @media(max-width:680px){.crow{grid-template-columns:42px 1fr 92px;row-gap:8px}.crow .c-hide{display:none}}
+
+  footer{margin-top:40px;padding-top:18px;border-top:1px solid var(--border);color:var(--text-faint);font-size:12px;display:flex;flex-wrap:wrap;gap:6px 18px;justify-content:space-between}
+  footer .mono{font-family:var(--mono)}
+
+  @media(max-width:720px){
+    .stats{grid-template-columns:repeat(2,1fr)}
+    .podium{grid-template-columns:1fr}
+    .colhead{display:none}
+    .rowmain{grid-template-columns:40px 1fr auto;gap:10px;row-gap:6px;padding-bottom:20px}
+    .rowmain .metric.big,.rowmain .metric.sm{display:none}
+    .views-cell{grid-column:3}
+    .chev{display:block}
+    .vid .t{white-space:normal;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+  }
+  @media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+
+</head>
+<body>
+<div class="wrap">
+  <header class="masthead">
+    <div class="brand">
+      <div class="eyebrow">CONVERTS&trade; System &middot; Client Standings</div>
+      <h1>The Creator Leaderboard</h1>
+      <div class="sub" id="sub"></div>
+    </div>
+    <button class="theme-toggle" id="themeBtn" type="button" aria-label="Toggle color theme">
+      <span id="themeIcon">◐</span><span id="themeLabel">Theme</span>
+    </button>
+  </header>
+
+  <div class="winbar">
+    <span class="winlabel">Time window</span>
+    <div class="segmented" id="winToggle" role="tablist" aria-label="Time window">
+      <button role="tab" data-days="7">7 days</button>
+      <button role="tab" data-days="30">30 days</button>
+      <button role="tab" data-days="90">90 days</button>
+      <button role="tab" data-days="365">365 days</button>
+    </div>
+  </div>
+
+  <div class="stats" id="stats"></div>
+
+  <div class="divbar" id="divbar" role="tablist" aria-label="Divisions"></div>
+
+  <div class="section-label">
+    <h2>🏆 On the Podium <span class="scope" id="podScope"></span></h2><div class="line"></div>
+    <span class="hint">Ranked by views</span>
+  </div>
+  <div id="podium"></div>
+
+  <div class="toolbar">
+    <div class="tabs" role="tablist" aria-label="Leaderboard view">
+      <button class="tab" role="tab" id="tab-videos" aria-selected="true" data-view="videos">Top Videos</button>
+      <button class="tab" role="tab" id="tab-creators" aria-selected="false" data-view="creators">Creator Standings</button>
+    </div>
+    <div class="rightctl">
+      <input class="search" id="search" type="search" placeholder="Search handle or hook" aria-label="Search videos">
+      <div class="sortsel">
+        <label for="sort">Sort</label>
+        <select class="srt" id="sort" aria-label="Sort by">
+          <option value="views">Views</option>
+          <option value="outlier">Outlier Score</option>
+          <option value="comments">Comments</option>
+          <option value="likes">Likes</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <div id="videosView"><div id="board" class="board"></div></div>
+  <div id="creatorsView" hidden><div class="creators" id="creators"></div></div>
+
+  <footer>
+    <span>Data: CONVERTS&trade; Client Data &middot; <span class="mono" id="period"></span></span>
+    <span class="mono" id="snapshot"></span>
+  </footer>
+</div>
+
+<script>
+const DATA = [
+ {
+  "handle": "soren.laney",
+  "title": "Snakes are a legit fear",
+  "views": 483663,
+  "comments": 148,
+  "likes": 35977,
+  "outlier": 1266.13,
+  "followers": 382,
+  "video_url": "https://www.instagram.com/reel/DXlQijvE3Hs/?utm_source=ig_web_copy_link&igsh=MzRlODBiNWFlZA==",
+  "audio_url": "https://www.instagram.com/reels/audio/780706150670573/",
+  "hook": "",
+  "transcript": "Let it all go Let it all go",
+  "caption": "Snakes are a legit fear \ud83d\ude2c",
+  "trigger": [],
+  "format": "Short Form Video",
+  "style": "B - Roll + Text",
+  "division": "broll",
+  "posted": "2026-04-26",
+  "rank": 1,
+  "drank": 1
+ },
+ {
+  "handle": "justinschumanofficial",
+  "title": "curiosity killed the cat. but not me! (yet)",
+  "views": 11370,
+  "comments": 96,
+  "likes": 1326,
+  "outlier": 0.06,
+  "followers": 186881,
+  "video_url": "https://www.instagram.com/p/DbzMEhaqYqB/",
+  "audio_url": "https://www.instagram.com/reels/audio/28206393565664486/",
+  "hook": "",
+  "transcript": "I've spent the last two months traveling the world basically by myself.\nI've like popped in and spent a week with friends here and there, but I am currently wrapping up my whirlwind travels in Seoul, Korea and going home in a couple days.\nAnd something happened the other night that I really want to share because I think it's demonstrative of the kind of life I really advocate everyone should live.\nSo I'm alone, I'm solo traveling and I like it.\nI've been single for four years.\nI'm very good at being by myself.\nI run my own business and I have a team.\nSo I interact with people all the time, but in-person interactions are not frequent for me because I'm by myself a lot.\nSo it was, I don't know, several nights ago and I got showered and I got dressed up and I look kind of cute.\nAnd I was like, I'm gonna go sit in the lobby bar and I'm gonna get a drink while I edit videos.\nThis is very common practice for me.\nI love a beautiful hotel.\nI love a beautiful bar.\nI love a beautiful cocktail.\nHappy to sit and feel adorable while I edit a video for social media.\nSo that's what I did.\nI went downstairs.\nI'm staying at the Intercontinental Seoul Parnas and it has a beautiful lobby bar.\nAnd I said, table for one, sat down, great.\nMade myself comfy, ordered this delightful gin drink and get to work, just start editing.\nI'm probably there for like a half hour, 40 minutes when a blonde lady walks in and she is sat at a table, not so close to me, but like over there, very long table.\nAnd she like catches my eye because she looks very similar to the actress from Hacks and Always Sunny Philadelphia.\nAnd I'm like, is that her?\nI'm like, could be.\nI mean, maybe they're filming something in Seoul, who knows?\nAnd I'm like, okay, whatever.\nI kind of put it out of my head.\nI get very curious eventually.\nAnd so I eventually like 10 or so minutes later shift my body positioning very naturally so I could like get a better look at this lady.\nIt's not her, but it is this like lovely, p",
+  "caption": "curiosity killed the cat. but not me! (yet)\n\n#solotravel #seoul #adultfriendships #neurodivergent #intuition",
+  "trigger": [],
+  "format": "Short Form Video",
+  "style": "Talking Head",
+  "division": "talking_head",
+  "posted": "2026-08-09",
+  "rank": 2,
+  "drank": 1
+ },
+ {
+  "handle": "jolihappynails",
+  "title": "Nail Techs, you already know if your last client is going to rebook. You knew before she reached the parking lot.",
+  "views": 7395,
+  "comments": 0,
+  "likes": 40,
+  "outlier": 2.57,
+  "followers": 2872,
+  "video_url": "https://www.instagram.com/p/Db9fm7xRCJE/",
+  "audio_url": "https://scontent-mxp2-1.cdninstagram.com/o1/v/t2/f2/m78/AQP0GmfJEBbZobuch35wkAqyW0qtqQ0DUZCgXoOwggeFNrSR5RSgfUWdf9IYfJxj4PsMR5Wi-QxQfdSxB_tSErT5_9QBtCLK2hV7AZI.mp4?_nc_cat=101&_nc_sid=9ca052&_nc_ht=scontent-mxp2-1.cdninstagram.com&_nc_ohc=CVwgtgeAKy8Q7kNvwGvPbUv&efg=eyJ2ZW5jb2RlX3RhZyI6ImlnLXhwdmRzLmNsaXBzLmMxLUMzLmRhc2hfbG5faGVhYWNfdmJyM19hdWRpbyIsInZpZGVvX2lkIjpudWxsLCJvaWxfdXJsZ2VuX2FwcF9pZCI6OTM2NjE5NzQzMzkyNDU5LCJjbGllbnRfbmFtZSI6ImlnIiwieHB2X2Fzc2V0X2lkIjoyNTkzNDMxMTc0NDUzMjUwLCJhc3NldF9hZ2VfZGF5cyI6MSwidmlfdXNlY2FzZV9pZCI6MTA4MjcsImR1cmF0aW9uX3MiOjcsImJpdHJhdGUiOjg0OTE0LCJ1cmxnZW5fc291cmNlIjoid3d3In0%3D&ccb=17-1&_nc_gid=9ZY1qXwKZBZX2C1iaxOkaA&_nc_zt=28&_nc_ss=7a22e&oh=00_AQGN3jK2qOLmXOBXDQAjhTntgCxkfOKmt5CNA8bhY9UETQ&oe=6A817F0E",
+  "hook": "Nail Techs, you already know if your last client is going to rebook. You knew before she reached the parking lot.",
+  "transcript": "",
+  "caption": "Nail Techs, you already know if your last client is going to rebook. You knew before she reached the parking lot.\n\nYou watched the way she looked at her hands, the quick thank you, the way she did not pull out her phone to check her calendar.\n\nWe pretend retention is a mystery. It is not. Your body reads the goodbye every single time and then your mind talks you out of what it saw, because sitting with it would mean changing something.\n\nThe difference between a client who is just busy and a client who is quietly gone is not a mystery either. The busy one booked her next slot before she left. The gone one said she would text you, and you already felt the difference in the room.\n\nHere is the good news. Almost everything that decides whether she comes back happens while she is still in your chair.\n\nThe dream result you define in the first thirty minutes, the structure that holds, the goodbye where she has already booked the next one.\n\nYou get to author that ending on purpose. Stop reading the parking lot. Start writing the goodbye. xx \ud83d\udc8e\n\nIf you can feel which clients are slipping and want to change how the appointment ends, comment \"RETENTION\" and I'll DM you the in-chair rebooking sequence.",
+  "trigger": [
+   "Connect with Symptoms"
+  ],
+  "format": "Short Form Video",
+  "style": "B - Roll + Text",
+  "division": "broll",
+  "posted": "2026-08-13",
+  "rank": 3,
+  "drank": 2
+ },
+ {
+  "handle": "justinschumanofficial",
+  "title": "literally begging you to be more self-indulgent",
+  "views": 1972,
+  "comments": 5,
+  "likes": 144,
+  "outlier": 0.01,
+  "followers": 186881,
+  "video_url": "https://www.instagram.com/p/Dbyg-OsK1Xs/",
+  "audio_url": "https://www.instagram.com/reels/audio/27795122780172556/",
+  "hook": "",
+  "transcript": "The most slept on skill if you wanna be a successful content creator is the ability to notice shit in your own life and like the ha moments that happen in your head that would ordinarily just like fly by the barcode scanner of your consciousness as you like throw them into your mental basket.\nOf course you think that the most impactful content you could create is like value packed and created for your ideal audience member when in reality the audience that you want to grow, an audience that knows you for you, an audience that the size of which is going to yield opportunities that could meaningfully shift and change your life, that audience is only going to grow because they know you not simply because they think of you as a walking, talking textbook which is the kind of content you're currently creating.\nBut then you think like I have nothing to share, nothing matters, you have to look between the lines because all you're really seeing are like the big chunky pieces of teaching and value and experience that you can share but you're not thinking about like I'm recording this content piece in this moment and I'm deliriously tired because it took me three plus days to get home from Korea and I got back into my apartment last night at like 10.30 p.m., slept.\nI'm just very, very tired and so like I can feel a version of me I'm showing up as while I record this video.\nBut see now you know so much more about me because I just told you that I was in Korea and it took me a fuck ton of time to get home and I'm tired and whatever and you might not be like we should be best friends but this value is now so much more personalized.\nLike the fact that I was coming on here to be like an important slept on thing, I'm becoming a content creator.\nLike that information has now been personalized, that value is value that could only really have come from me because it has color, it has scent.\nNow like I sprayed my pheromone and my cologne on it by telling you about the Korea th",
+  "caption": "literally begging you to be more self-indulgent",
+  "trigger": [],
+  "format": "Short Form Video",
+  "style": "Talking Head",
+  "division": "talking_head",
+  "posted": "2026-08-08",
+  "rank": 4,
+  "drank": 2
+ },
+ {
+  "handle": "jolihappynails",
+  "title": "Nail Techs, you know that thing you do where you write a booking in your paper planner, then again in your phone calenda",
+  "views": 1162,
+  "comments": 0,
+  "likes": 18,
+  "outlier": 0.4,
+  "followers": 2872,
+  "video_url": "https://www.instagram.com/p/Db9aNzBJbrs/",
+  "audio_url": "https://instagram.fktw4-1.fna.fbcdn.net/o1/v/t2/f2/m78/AQN72JDl4T1LgiOakPi6mFbhMdL5ENiU3wNx7f4qRrgoNchyD6NRuM93ujaqlKH4D5k2Ga8Ae3O-ivSe3DstSddd7XmanyvGofEaArk.mp4?_nc_cat=100&_nc_oc=Adr2-5VBGjdIPm2sXX1O7zEngKA2QUngl5VhcDBjz87O6lO8XkI839cc3qjmi2s4kAc&_nc_sid=9ca052&_nc_ht=instagram.fktw4-1.fna.fbcdn.net&_nc_ohc=CSSgBljUoC4Q7kNvwHAXqst&efg=eyJ2ZW5jb2RlX3RhZyI6ImlnLXhwdmRzLmNsaXBzLmMyLUMzLmRhc2hfbG5faGVhYWNfdmJyM19hdWRpbyIsInZpZGVvX2lkIjpudWxsLCJvaWxfdXJsZ2VuX2FwcF9pZCI6OTM2NjE5NzQzMzkyNDU5LCJjbGllbnRfbmFtZSI6ImlnIiwieHB2X2Fzc2V0X2lkIjoyNDU1NTAwMzA0OTMzNzkxLCJhc3NldF9hZ2VfZGF5cyI6MSwidmlfdXNlY2FzZV9pZCI6MTA4MjcsImR1cmF0aW9uX3MiOjcsImJpdHJhdGUiOjg0ODA0LCJ1cmxnZW5fc291cmNlIjoid3d3In0%3D&ccb=17-1&_nc_gid=Xwvcm6JxdLkJN59xqqhOVg&_nc_ss=7a22e&_nc_zt=28&oh=00_AQGjEMkUXZ3vsSnMzgZctf-rssLiZ4DbrL1GQkkd2Sv0kw&oe=6A8174B5",
+  "hook": "Nail Techs, you know that thing you do where you write a booking in your paper planner, then again in your phone calendar, then on a sticky note stuck to the desk?",
+  "transcript": "",
+  "caption": "Nail Techs, you know that thing you do where you write a booking in your paper planner, then again in your phone calendar, then on a sticky note stuck to the desk?\n\nThat is not you being organized. That is what it looks like when losing one booking feels like it could end you. I know that feeling because I have lived close to it.\n\nWhen your income depends entirely on a full week, a single missed appointment stops being an error and starts feeling like proof the whole thing is fragile. So you triple write everything and you still check it four times a night.\n\nThe three-place system is a symptom. The real problem is that your calendar is not stable enough for your nervous system to trust it.\n\nWhen retention is low and half your bookings are one-time clients, of course every slot feels precious, because you do not know if it comes back.\n\nThe fix is not a better planner. The fix is client retention, so the same faces fill your week on repeat and you stop bracing for the empty slot.\n\nWhen your regulars book their next appointment in the chair before they leave, the sticky notes disappear on their own. You deserve a week you do not have to guard like it might run away. xx \ud83d\udc8e\n\nIf you write your bookings in three places because losing one feels terminal, comment \"RETENTION\" and I'll DM you the in-chair rebooking habit that steadied my calendar.",
+  "trigger": [
+   "Connect with Symptoms"
+  ],
+  "format": "Short Form Video",
+  "style": "B - Roll + Text",
+  "division": "broll",
+  "posted": "2026-08-13",
+  "rank": 5,
+  "drank": 3
+ },
+ {
+  "handle": "susiebower_",
+  "title": "Twenty five years of bodywork and eight surgeries of my own. I did not read about the body keeping the score. I lived it",
+  "views": 997,
+  "comments": 3,
+  "likes": 10,
+  "outlier": 3.43,
+  "followers": 291,
+  "video_url": "https://www.instagram.com/reel/Db-MCsLKP9b/?igsh=MXJheXhjY2pyaWVmcg==",
+  "audio_url": "https://www.instagram.com/reels/audio/26606461265703434/",
+  "hook": "",
+  "transcript": "",
+  "caption": "Twenty five years of bodywork and eight surgeries of my own. I did not read about the body keeping the score. I lived it. \n\nIf your pain keeps outsmarting every fix, you want someone who has been on both sides of it. Book a call in my bio. \n\n#chronicpain #backpain #somatichealing #nervoussystem",
+  "trigger": [],
+  "format": "Short Form Video",
+  "style": "B - Roll + Text",
+  "division": "broll",
+  "posted": "2026-08-13",
+  "rank": 6,
+  "drank": 4
+ },
+ {
+  "handle": "revivetherapyservices",
+  "title": "So much of high functioning looks like pure competence from the outside and feels like low grade fear on the inside.",
+  "views": 975,
+  "comments": 0,
+  "likes": 16,
+  "outlier": 0.64,
+  "followers": 1519,
+  "video_url": "https://www.instagram.com/p/Db3wM89lCeo/",
+  "audio_url": "https://instagram.fria4-1.fna.fbcdn.net/o1/v/t2/f2/m78/AQNymBnTt7_VN3K50GGjKnU87gssugOe7tDSCyRtzewAdcnSC0k_0Y_eF4AYCd9xpXBKWTpYwjnJ51vTxLndU8wD5-hxeQiuQYrcg_c.mp4?_nc_cat=101&_nc_oc=AdoFiF96k2rO3xBuOZU5CApDy_yPcrGBzrvHSCvKDsfAtAbUu_DFTesqv_0RuFZ5zOk&_nc_sid=9ca052&_nc_ht=instagram.fria4-1.fna.fbcdn.net&_nc_ohc=94RMo5av5xsQ7kNvwHnJMii&efg=eyJ2ZW5jb2RlX3RhZyI6ImlnLXhwdmRzLmNsaXBzLmMyLUMzLmRhc2hfbG5faGVhYWNfdmJyM19hdWRpbyIsInZpZGVvX2lkIjpudWxsLCJvaWxfdXJsZ2VuX2FwcF9pZCI6OTM2NjE5NzQzMzkyNDU5LCJjbGllbnRfbmFtZSI6ImlnIiwieHB2X2Fzc2V0X2lkIjoxODA5NDU5OTg2OTQ1NDY0OCwiYXNzZXRfYWdlX2RheXMiOjQsInZpX3VzZWNhc2VfaWQiOjEwMDk5LCJkdXJhdGlvbl9zIjo4LCJiaXRyYXRlIjo2ODEzNywidXJsZ2VuX3NvdXJjZSI6Ind3dyJ9&ccb=17-1&_nc_gid=PFyhRf_DG3qrknisKvPXRQ&_nc_zt=28&_nc_ss=7a22e&oh=00_AQG4HsfJ5BoLhYrVZUMu3nqFYIdG212oN0ksnJalYOfnFA&oe=6A818DEE",
+  "hook": "So much of high functioning looks like pure competence from the outside and feels like low grade fear on the inside.",
+  "transcript": "",
+  "caption": "So much of high functioning looks like pure competence from the outside and feels like low grade fear on the inside.\n\nPicture sending the email with your rate in it and not immediately over explaining or shaving the number down in the very next line, because you named it and let it sit there without flinching.\n\nPicture making a genuinely big decision, the job or the move or the ending, from a steady place in your body instead of from the old panic that says just pick whatever keeps everyone else comfortable.\n\nPicture a random Wednesday where you got almost nothing done and your sense of being worth something didn't move a single inch, because your worth stopped being contingent on your output.\n\nFor a lot of high functioning women, being useful was how you stayed safe and stayed loved, so your body learned to tie your value straight to your productivity, and that is a survival pattern that body based work can help recalibrate. You are a badass bitch whether or not you were productive today.\n\nYou can still care and still work hard, and your worth simply stops being the thing on the line every single time you rest.\n\nIf your value feels welded to your output, comment \"[WORTH]\" and I'll send you where to start, no pitch and no pressure!",
+  "trigger": [
+   "Narrate Desired Outcomes"
+  ],
+  "format": "Short Form Video",
+  "style": "B - Roll + Text",
+  "division": "broll",
+  "posted": "2026-08-10",
+  "rank": 7,
+  "drank": 5
+ },
+ {
+  "handle": "jolihappynails",
+  "title": "Nail Techs, someone once called me the Queen of Simple, and I understood what they meant, but here is how I actually see",
+  "views": 948,
+  "comments": 0,
+  "likes": 30,
+  "outlier": 0.33,
+  "followers": 2872,
+  "video_url": "https://www.instagram.com/p/Db7N2qohjKS/",
+  "audio_url": "https://www.instagram.com/reels/audio/1263941094320818/",
+  "hook": "",
+  "transcript": "",
+  "caption": "Nail Techs, someone once called me the Queen of Simple, and I understood what they meant, but here is how I actually see it. I am more of a sculptor than a painter.\n\nThe foundation being perfect is what makes the artsy parts on top look greater. The best techs are not the ones with the flashiest designs. They are the ones obsessed with structure, because they know decoration sits on top of a foundation and a bad foundation shows through everything.\n\nPainters fix problems on the surface. Sculptors prevent them underneath. This is an identity choice, not just a technique. When you decide you are a sculptor of the nail, you stop chasing trends for the feed and start building the underlying structure that makes a set last six weeks and a client stay six years. The art becomes the easy part once the sculpture is right.\n\nYou are allowed to be known for the structure nobody photographs. That is where the money and the loyalty actually live.\n\nLess is MORE was never about doing less, it was about the foundation being so right that nothing loud is needed. Decide which one you are. Then build like it. xx \ud83d\udc8e\n\n If you want to work like a sculptor of the nail instead of a painter, comment \"RETENTION\" and I'll DM you where structure-first actually starts.",
+  "trigger": [
+   "Tap into Identity"
+  ],
+  "format": "Short Form Video",
+  "style": "B - Roll + Text",
+  "division": "broll",
+  "posted": "2026-08-12",
+  "rank": 8,
+  "drank": 6
+ },
+ {
+  "handle": "revivetherapyservices",
+  "title": "You are not too much and you are not broken, your nervous system just learned a long time ago that closeness was risky!",
+  "views": 879,
+  "comments": 4,
+  "likes": 31,
+  "outlier": 0.58,
+  "followers": 1519,
+  "video_url": "https://www.instagram.com/p/Db1P_2VG9_T/",
+  "audio_url": "https://scontent-cdg4-2.cdninstagram.com/o1/v/t2/f2/m78/AQMt7Hl8xG_MhZOQZp5G8UCi9Yrdl_hkZZeQQGaoolmBldji2KHcooenwwXDB2AFp6bWT5GId6GWYwROTOZCmLXlkPVCq0HDdkay4Ds.mp4?_nc_cat=109&_nc_sid=9ca052&_nc_ht=scontent-cdg4-2.cdninstagram.com&_nc_ohc=JEvKHflPcMkQ7kNvwEFlq8u&efg=eyJ2ZW5jb2RlX3RhZyI6ImlnLXhwdmRzLmNsaXBzLmMyLUMzLmRhc2hfbG5faGVhYWNfdmJyM19hdWRpbyIsInZpZGVvX2lkIjpudWxsLCJvaWxfdXJsZ2VuX2FwcF9pZCI6OTM2NjE5NzQzMzkyNDU5LCJjbGllbnRfbmFtZSI6ImlnIiwieHB2X2Fzc2V0X2lkIjoxODA5NDQ5NzU4MTQ1NDY0OCwiYXNzZXRfYWdlX2RheXMiOjUsInZpX3VzZWNhc2VfaWQiOjEwMDk5LCJkdXJhdGlvbl9zIjo5NiwiYml0cmF0ZSI6NTExMTAsInVybGdlbl9zb3VyY2UiOiJ3d3cifQ%3D%3D&ccb=17-1&_nc_gid=WesM6JhGuTwTmPMqIoOQeA&_nc_zt=28&_nc_ss=7a22e&oh=00_AQGdOZi9VlC15bcTznOHpVV_N867e9BmtQDB9CRYxABvaw&oe=6A81A436",
+  "hook": "If you push people away and then the minute they go, you start panicking,",
+  "transcript": "If you push people away and then the minute they go, you start panicking, hang out with me for just a second.\nThis is actually a really common thing with people.\nYou crave closeness more than anything and then the minute someone gets too close, your body kind of just goes, Mayday, I don't wanna be close to anyone and it pushes them away.\nThen here's the good old switcheroo.\nThey start pulling away a little bit.\nMaybe it's they don't respond to your texts as quickly as they did before and then hits the anxiety.\nYou send them five texts, boom, boom, boom, boom, boom, seeking and yearning for that connection and attention from them.\nAnd after you send those five texts, you definitely are hating yourself.\nFor some reason, you keep choosing these emotionally unavailable people while the steady, kind person who actually likes you makes your skin crawl.\nBy the way, none of this means you're needy or broken or bad at love.\nWhat most likely is happening is your nervous system learned really early on that connection was unpredictable.\nSo it treats closeness with someone as a thing it so desperately wants and so desperately hates at the same time.\nThe thing is your body is running this script where getting hurt and getting close to someone live in the same area.\nSo it's like reaching out and flinching at the same time.\nSo that pattern that you're judging yourself for, it's there for a reason.\nAnd the nice thing is it can be recalibrated.\nIt doesn't have to be like that for forever.",
+  "caption": "You are not too much and you are not broken, your nervous system just learned a long time ago that closeness was risky! If you spiral into the anxious texts the second someone pulls back, comment \"[CLOSE]\" and I'll send you the free worksheet I wish I'd had. No pressure!",
+  "trigger": [
+   "Connect with Symptoms"
+  ],
+  "format": "Short Form Video",
+  "style": "Talking Head",
+  "division": "talking_head",
+  "posted": "2026-08-09",
+  "rank": 9,
+  "drank": 3
+ },
+ {
+  "handle": "jolihappynails",
+  "title": "If you have caught yourself sealing a lift under top coat to save time, comment \"BUILDER\" and I'll DM you the free call",
+  "views": 871,
+  "comments": 0,
+  "likes": 38,
+  "outlier": 0.3,
+  "followers": 2872,
+  "video_url": "https://www.instagram.com/p/Db4qQ3eBdeS/",
+  "audio_url": "https://scontent-ams2-1.cdninstagram.com/o1/v/t2/f2/m78/AQM6kjVHNQ7aczueA_1PGDWZtxsi5qiEBEgZ7HBGT97g2tnLzYE3rnyMM-PSPt_xlpLiykbZTLZMNbM123G3TxxjzfCLnVGXtx2ZNio.mp4?_nc_cat=107&_nc_sid=9ca052&_nc_ht=scontent-ams2-1.cdninstagram.com&_nc_ohc=63NIPpx7Tc0Q7kNvwH2Qfv1&efg=eyJ2ZW5jb2RlX3RhZyI6ImlnLXhwdmRzLmNsaXBzLmMyLUMzLmRhc2hfbG5faGVhYWNfdmJyM19hdWRpbyIsInZpZGVvX2lkIjpudWxsLCJvaWxfdXJsZ2VuX2FwcF9pZCI6OTM2NjE5NzQzMzkyNDU5LCJjbGllbnRfbmFtZSI6ImlnIiwieHB2X2Fzc2V0X2lkIjoxNjc5NzUwMDM5NzUwNDQzLCJhc3NldF9hZ2VfZGF5cyI6MywidmlfdXNlY2FzZV9pZCI6MTA4MjcsImR1cmF0aW9uX3MiOjEyMiwiYml0cmF0ZSI6NTc3ODksInVybGdlbl9zb3VyY2UiOiJ3d3cifQ%3D%3D&ccb=17-1&_nc_gid=WD4UgXZxx3YcKdIPx_7XYA&_nc_zt=28&_nc_ss=7a22e&oh=00_AQHkSjn4r0zTLyqqiig8piuKFc-3m_Ho-_EtQGUw0qht5A&oe=6A81A0D8",
+  "hook": "So, this is for the nail text, specifically for those that can relate to",
+  "transcript": "So, this is for the nail text, specifically for those that can relate to this scenario.\nSo, there is a thumb in one of your last three sets with a lifted edge that you painted top coat right over, and that thumb is the reason she's not texting you back.\nSo, I want to talk about the little moment nobody films.\nYou finish a set, you spot a tiny lift on the thumb, and instead of starting that finger over, you glide top coat across it and tell her it's done.\nI've done it too early on when I was tired and the next client was already sitting in the chair.\nHere is actually what happens after she leaves.\nThat seal lift becomes a pocket, moisture gets under it, and somewhere around day five, it catches on a sweater, and she feels it.\nShe does not call you to complain.\nShe just quietly books with someone else and tells herself your work is a little too delicate for her life.\nThe mistake is not the lift.\nThe mistake is deciding that a hidden problem is the same thing as a solved problem.\nOn a natural nail, a lift you cannot see is still a lift the client will find because she lives inside those hands all day and you only see them for two hours.\nSo, when I train the removal and prep sequence, the whole point is that you start every set so clean there is nothing to hide.\nIf you remove 95 to 99% of the old product and you prep the edge properly, that lift does not appear on day five because you did not seal a weak spot in on day one.\nSo, the next time you are tempted to top coat over a thumb, stop and redo the finger.\nIt costs you four minutes now.\nSealing it costs you the client, and she was the one who was going to send you her friend.",
+  "caption": "If you have caught yourself sealing a lift under top coat to save time, comment \"BUILDER\" and I'll DM you the free call so you can do the removal and prep sequence I start every set with.",
+  "trigger": [
+   "Speak to Gaps and Mistakes"
+  ],
+  "format": "Short Form Video",
+  "style": "Talking Head",
+  "division": "talking_head",
+  "posted": "2026-08-11",
+  "rank": 10,
+  "drank": 4
+ },
+ {
+  "handle": "jolihappynails",
+  "title": "If the e-file still makes you tense up, comment \"BUILDER\" and I'll DM you the pressure drill that took the fear out of i",
+  "views": 826,
+  "comments": 2,
+  "likes": 59,
+  "outlier": 0.29,
+  "followers": 2872,
+  "video_url": "https://www.instagram.com/p/Db9SxqPJ9cg/",
+  "audio_url": "https://scontent-mrs2-3.cdninstagram.com/o1/v/t2/f2/m78/AQMVbQEqtVxSex5V-rCXK1g4OTr_lbkl08UKcAhdpqg_XxYYdQ-nRauDJ-FwQaKhZ4lbWspwb8ehR0y_9B4Su0B-2NHm0aA3LvwG9gk.mp4?_nc_cat=102&_nc_sid=9ca052&_nc_ht=scontent-mrs2-3.cdninstagram.com&_nc_ohc=ocpEGQ_eEi8Q7kNvwGdKcZY&efg=eyJ2ZW5jb2RlX3RhZyI6ImlnLXhwdmRzLmNsaXBzLmMyLUMzLmRhc2hfbG5faGVhYWNfdmJyM19hdWRpbyIsInZpZGVvX2lkIjpudWxsLCJvaWxfdXJsZ2VuX2FwcF9pZCI6OTM2NjE5NzQzMzkyNDU5LCJjbGllbnRfbmFtZSI6ImlnIiwieHB2X2Fzc2V0X2lkIjoxNzQ2NTMzMDA5NzExMTM0LCJhc3NldF9hZ2VfZGF5cyI6MiwidmlfdXNlY2FzZV9pZCI6MTA4MjcsImR1cmF0aW9uX3MiOjExMywiYml0cmF0ZSI6NTkwMDMsInVybGdlbl9zb3VyY2UiOiJ3d3cifQ%3D%3D&ccb=17-1&_nc_gid=CA3JLg8oacNnYw9vrR7gqg&_nc_zt=28&_nc_ss=7a22e&oh=00_AQEK6lz3uYqbU5JoYNOdZLWCWedHZNSwnTNDbFi00UqYzA&oe=6A81847F",
+  "hook": "This is for the nail tech. Specifically, if you get a little tense every",
+  "transcript": "This is for the nail tech.\nSpecifically, if you get a little tense every time you pick up the e-file, that fear is really about pressure.\nNobody ever taught you to control and the tool is just taking the blame.\nSo many of you are quietly scared of the e-file and you should hear that the fear makes sense.\nYou were probably told at some point that the drill thins the nails, that it is a dangerous tool.\nSo now every time you bring it to the nail, your hand tightens up and you rush.\nHere is the part that reframes everything.\nThe e-file does not ruin the nails.\nPressure thins the nails.\nThe tool is neutral.\nIt is like saying a knife only does damage when the difference sits entirely with how you use it.\nSo the reason you're scared is that you were a powerful tool and never taught one variable that keeps it safe.\nWatch what your fear actually makes you do.\nYou either avoid the drill and spend an extra 20 minutes hand filing or use it stiff and heavy because the tense hand presses harder without realizing it.\nSo both come from the same gap.\nNobody sat next to you and showed you what correct light pressure feels like.\nWhen I teach the e-file, we do not start with speed or bits.\nWe start with pressure.\nBecause once your hand knows the right amount, the tool becomes the gentlest, fastest thing in your kit instead of the scariest.\nThe drill stops being a risk and becomes the reason your removals are clean and quick.\nSo the next time your shoulder creeps up as you reach for the drill, notice it and remember the fear is pointing at a missing skill, not a dangerous machine.\nLearn the pressure and the fear just leaves because there's nothing left to be afraid of.",
+  "caption": "If the e-file still makes you tense up, comment \"BUILDER\" and I'll DM you the pressure drill that took the fear out of it for me.",
+  "trigger": [
+   "Connect with Symptoms"
+  ],
+  "format": "Short Form Video",
+  "style": "Talking Head",
+  "division": "talking_head",
+  "posted": "2026-08-12",
+  "rank": 11,
+  "drank": 5
+ },
+ {
+  "handle": "revivetherapyservices",
+  "title": "You wake up at 3am with a wave of dread and no reason for it, and you lie there in the dark scanning for a threat your b",
+  "views": 798,
+  "comments": 3,
+  "likes": 23,
+  "outlier": 0.53,
+  "followers": 1519,
+  "video_url": "https://www.instagram.com/p/Db3g9SNPfgM/",
+  "audio_url": "https://instagram.fyyc7-1.fna.fbcdn.net/o1/v/t2/f2/m78/AQMKIm-ILB5N69enurskZsppyQL1Gf6jc1e14ppvCDKRDDwEXurhCzuOwTtflhfgD24nDXvxZHt8bGJKj1YUN0t386pkegpMz_fC5BM.mp4?_nc_cat=104&_nc_oc=Adr8J5jxwpzcT23pzY1J3-oOWpMx2A0uzt1eJkkCOboIS3Zs9bPI5YtCexeMEuaH4SA&_nc_sid=9ca052&_nc_ht=instagram.fyyc7-1.fna.fbcdn.net&_nc_ohc=Ow8JnQ0lhrgQ7kNvwFmwpXb&efg=eyJ2ZW5jb2RlX3RhZyI6ImlnLXhwdmRzLmNsaXBzLmMyLUMzLmRhc2hfbG5faGVhYWNfdmJyM19hdWRpbyIsInZpZGVvX2lkIjpudWxsLCJvaWxfdXJsZ2VuX2FwcF9pZCI6OTM2NjE5NzQzMzkyNDU5LCJjbGllbnRfbmFtZSI6ImlnIiwieHB2X2Fzc2V0X2lkIjoyNzEzNDAwNTk5OTYwNjIzMSwiYXNzZXRfYWdlX2RheXMiOjQsInZpX3VzZWNhc2VfaWQiOjEwODI3LCJkdXJhdGlvbl9zIjo3LCJiaXRyYXRlIjo2ODM1MiwidXJsZ2VuX3NvdXJjZSI6Ind3dyJ9&ccb=17-1&_nc_gid=QWE1yqNPV33obp-KO6Cc3g&_nc_ss=7a22e&_nc_map=urlgen_bucketless&_nc_zt=28&oh=00_AQFaBqLdUGGRR307WEA1uo_XMzx_Irv7msdv-iTsxmzgZg&oe=6A81A3B5",
+  "hook": "You wake up at 3am with a wave of dread and no reason for it, and you lie there in the dark scanning for a threat your body swears is standing in the room.",
+  "transcript": "",
+  "caption": "You wake up at 3am with a wave of dread and no reason for it, and you lie there in the dark scanning for a threat your body swears is standing in the room.\n\nThen it shows up in the middle of a normal Tuesday meeting, where your chest goes tight and your stomach clenches while somebody talks about a spreadsheet, and nothing is actually wrong.\n\nYour heart races at random moments and you have quietly stopped trying to explain it to anyone, because there is no story that makes it make sense.\n\nYour nervous system is doing its job a little too well, because somewhere along the way it learned that staying on guard kept you safe, and it never got the memo that the danger is over.\n\nThe dread at 3am is an old alarm that got stored in your body and never recalibrated, so it keeps going off long after the thing that set it off is gone.\n\nYour body has been working overtime to protect you like a smoke alarm that will not reset on its own, and that alarm can absolutely be turned down.\n\nIf you wake up at 3am scanning for a threat that isn\u2019t there, comment \u201c[CALM]\u201d and I\u2019ll send you the free nervous system worksheet I wish I\u2019d had back when mine wouldn\u2019t shut off. No pressure!",
+  "trigger": [
+   "Connect with Symptoms"
+  ],
+  "format": "Short Form Video",
+  "style": "B - Roll + Text",
+  "division": "broll",
+  "posted": "2026-08-10",
+  "rank": 12,
+  "drank": 7
+ },
+ {
+  "handle": "altaredstatesofconsciousness",
+  "title": "save this one, babe. the way home to yourself isn't a personality transplant. it's learning to feel your own yes land be",
+  "views": 734,
+  "comments": 0,
+  "likes": 18,
+  "outlier": 0.02,
+  "followers": 44885,
+  "video_url": "https://www.instagram.com/p/DcAeho2BmH1/",
+  "audio_url": "https://instagram.frtm1-2.fna.fbcdn.net/o1/v/t2/f2/m78/AQOxX2fAIK9vE_CDCMYObYz8Ye_DCHPNt5ggon5HFC5NBGDY6IDZUtXftD9Tdjl1Mjjg1YpvlQY2jlH9_5-g5bAtHwNQDPdmAr376VM.mp4?_nc_cat=101&_nc_oc=AdqJl6K0sXyt447jGn3VCp-bBBHMZQ_YZbeHUv-mtAiyodCu78FarbPHRVezgeCslJU&_nc_sid=9ca052&_nc_ht=instagram.frtm1-2.fna.fbcdn.net&_nc_ohc=cLwwGmMZtDEQ7kNvwGdPe35&efg=eyJ2ZW5jb2RlX3RhZyI6ImlnLXhwdmRzLmNsaXBzLmMxLUMzLmRhc2hfbG5faGVhYWNfdmJyM19hdWRpbyIsInZpZGVvX2lkIjpudWxsLCJvaWxfdXJsZ2VuX2FwcF9pZCI6OTM2NjE5NzQzMzkyNDU5LCJjbGllbnRfbmFtZSI6ImlnIiwieHB2X2Fzc2V0X2lkIjoyMTEwNzIxNzUyODE2NDQyLCJhc3NldF9hZ2VfZGF5cyI6MCwidmlfdXNlY2FzZV9pZCI6MTAwOTksImR1cmF0aW9uX3MiOjYsImJpdHJhdGUiOjY5ODg3LCJ1cmxnZW5fc291cmNlIjoid3d3In0%3D&ccb=17-1&_nc_gid=Nn0i895Sp160_yv7MOpDDQ&_nc_zt=28&_nc_ss=7a22e&oh=00_AQFNInmt4aG2Z18EzW7U4CnFITIMLfItnnmJvF9jRlcqGA&oe=6A81992A",
+  "hook": "Just trust me you'll be fine And when I'm back in Chicago I feel",
+  "transcript": "Just trust me you'll be fine And when I'm back in Chicago I feel",
+  "caption": "save this one, babe. the way home to yourself isn't a personality transplant. it's learning to feel your own yes land before you consult everyone else's comfort. it's meeting the part that taught you to override it. it's letting one person witness what you've always carried alone. this is the same roadmap i walk with my 1:1 clients \ud83d\udda4",
+  "trigger": [
+   "Narrate Desired Outcomes"
+  ],
+  "format": "Short Form Video",
+  "style": "Talking Head",
+  "division": "talking_head",
+  "posted": "2026-08-14",
+  "rank": 13,
+  "drank": 6
+ },
+ {
+  "handle": "kdmueller",
+  "title": "be raw, be an open book, trauma dump in the all hands and call it vulnerability. that is not authenticity, that\u2019s a miss",
+  "views": 723,
+  "comments": 0,
+  "likes": 29,
+  "outlier": 0.61,
+  "followers": 1193,
+  "video_url": "https://www.instagram.com/p/DcBKA_aBCup/",
+  "audio_url": "https://www.instagram.com/reels/audio/815040378067814/",
+  "hook": "",
+  "transcript": "",
+  "caption": "be raw, be an open book, trauma dump in the all hands and call it vulnerability. that is not authenticity, that\u2019s a missing filter.\nreal authenticity is integrity: your values, your decisions, and how you show up all line up, so people know what they\u2019re getting.\nthe most trusted women aren\u2019t the most exposed. they\u2019re the most consistent.\nstop confusing oversharing with truth. comment ALIGNED for the difference.",
+  "trigger": [
+   "Villains & Differentiation"
+  ],
+  "format": "Short Form Video",
+  "style": "B - Roll + Text",
+  "division": "broll",
+  "posted": "2026-08-14",
+  "rank": 14,
+  "drank": 8
+ },
+ {
+  "handle": "revivetherapyservices",
+  "title": "You're allowed to close the self help tab and go live your actual life. If healing has quietly become your entire person",
+  "views": 622,
+  "comments": 2,
+  "likes": 30,
+  "outlier": 0.41,
+  "followers": 1519,
+  "video_url": "https://www.instagram.com/p/Db1CYMZAgmJ/",
+  "audio_url": "https://instagram.ffuk3-1.fna.fbcdn.net/o1/v/t2/f2/m78/AQPVvajL6rY9XYY8yWcj_Vs2YbcHgasdasI_6Wl0C_9Oe_B8LzJxjTd_tGArl8O5_SDdbDR2LUvCORvzQD_Z0Jm0XgJtEzF9ZdcxNqI.mp4?_nc_cat=111&_nc_oc=AdrZLuWZfhMvU6JPCOoiJHIYUQjNnsojP-HuKazYC6h48Ret1pyhcqCRHnpaWuoHjws&_nc_sid=9ca052&_nc_ht=instagram.ffuk3-1.fna.fbcdn.net&_nc_ohc=Urtk6Swo5h8Q7kNvwEx3fQD&efg=eyJ2ZW5jb2RlX3RhZyI6ImlnLXhwdmRzLmNsaXBzLmlnd3d3LUMzLmRhc2hfbG5faGVhYWNfdmJyM19hdWRpbyIsInZpZGVvX2lkIjpudWxsLCJvaWxfdXJsZ2VuX2FwcF9pZCI6OTM2NjE5NzQzMzkyNDU5LCJjbGllbnRfbmFtZSI6ImlnIiwieHB2X2Fzc2V0X2lkIjoxODA5NDQ4ODg4NDQ1NDY0OCwiYXNzZXRfYWdlX2RheXMiOjUsInZpX3VzZWNhc2VfaWQiOjEwMDk5LCJkdXJhdGlvbl9zIjoxMjIsImJpdHJhdGUiOjU1MDY1LCJ1cmxnZW5fc291cmNlIjoid3d3In0%3D&ccb=17-1&_nc_gid=mtJe6NdOKn8D-TenGIs7hQ&_nc_ss=72a8c&_nc_zt=28&oh=00_AQEsahLEPFTAxtZ2sFZNNW8g8HfOJRgtAX9WBcy82SLa4A&oe=6A817E58",
+  "hook": "If healing has become another full-time job for you, you're doing healing wrong. This",
+  "transcript": "If healing has become another full-time job for you, you're doing healing wrong.\nThis happens to a lot of us, myself included, where healing becomes a full-time job, where you're constantly reading the new self-help books, your entire algorithm is self-help healing videos, and you're constantly monitoring yourself to make sure that you're healing.\nAnd so the focus of healing actually just takes up the same amount of space as your trauma does or did.\nI want you to picture this idea of healing as actually just living, when yes, you show up and do the work, but then you put it to the side and then you go out to dinner and have a great time with your friends.\nImagine just being present on a Sunday afternoon, you're sitting outside, the sun's on your skin, you have your favorite cup of coffee, and you're actually present.\nThere's no background noise about what you should be doing differently or how at the end of the day you're not doing enough or you aren't enough.\nThat kind of presence is the whole freaking point, guys.\nJust take a second and think about how much your past has been running your future and very much so your present.\nIt dictates how you read into someone's tone of voice or to brace when someone says they need to have a conversation with you.\nJust imagine all of that taking a back seat.\nIt might still be there, but it's no longer in the driver's seat.\nAnd that is the point of this work is body-based work.\nThe goal was never to get rid of every traumatic memory and arrive at some final version of yourself where you're perfect and you never struggle ever again because that's not realistic.\nImagine your body finally feeling safe right now, not 10 years from now, not one year from now.\nMy point is healing is a part of life.\nIt should not be your whole life.\nWhat if there was no finish line that you needed to figure out how to cross?\nWhat if you're kind of already there?\nWhat if you can be present now?\nThere's nothing you have to wait to do or wait fo",
+  "caption": "You're allowed to close the self help tab and go live your actual life. If healing has quietly become your entire personality, comment \"[LIVING]\" and I'll send you where to start!",
+  "trigger": [
+   "Narrate Desired Outcomes"
+  ],
+  "format": "Short Form Video",
+  "style": "Talking Head",
+  "division": "talking_head",
+  "posted": "2026-08-09",
+  "rank": 15,
+  "drank": 7
+ },
+ {
+  "handle": "altaredstatesofconsciousness",
+  "title": "you know that feeling when you type why do i feel so numb and disconnected into the search bar at midnight and then dele",
+  "views": 612,
+  "comments": 0,
+  "likes": 8,
+  "outlier": 0.01,
+  "followers": 44885,
+  "video_url": "https://www.instagram.com/p/Db9WpFIvcq-/",
+  "audio_url": "https://scontent-cdg6-1.cdninstagram.com/o1/v/t2/f2/m78/AQPUhvDuBD5WQuJSrjYhMLd-5pGjV0WxJVF6TqdQ7yL67U_JTF0ckiLHWqrOsm3uToaojppV-dmMQBUa3TfwHe9WBerDzB26Qo9gohs.mp4?_nc_cat=103&_nc_sid=9ca052&_nc_ht=scontent-cdg6-1.cdninstagram.com&_nc_ohc=wR3OoGauVhIQ7kNvwHp0DYJ&efg=eyJ2ZW5jb2RlX3RhZyI6ImlnLXhwdmRzLmNsaXBzLmMyLUMzLmRhc2hfbG5faGVhYWNfdmJyM19hdWRpbyIsInZpZGVvX2lkIjpudWxsLCJvaWxfdXJsZ2VuX2FwcF9pZCI6OTM2NjE5NzQzMzkyNDU5LCJjbGllbnRfbmFtZSI6ImlnIiwieHB2X2Fzc2V0X2lkIjoyNzk0NzIzNzg0MjM4MzIzLCJhc3NldF9hZ2VfZGF5cyI6MiwidmlfdXNlY2FzZV9pZCI6MTAwOTksImR1cmF0aW9uX3MiOjExLCJiaXRyYXRlIjo3MDQ0NiwidXJsZ2VuX3NvdXJjZSI6Ind3dyJ9&ccb=17-1&_nc_gid=zv4xxKs_0aR-kAZbrp1XuQ&_nc_zt=28&_nc_ss=7a22e&oh=00_AQHV2xHigm4f3XN9r0FPSdDXuKRQA9S01KUVa9xfKe1Piw&oe=6A818630",
+  "hook": "you know that feeling when you type why do i feel so numb and disconnected into the search bar at midnight and then delete it before anyone could ever see? babe. that search was you reaching for yours",
+  "transcript": "",
+  "caption": "you know that feeling when you type why do i feel so numb and disconnected into the search bar at midnight and then delete it before anyone could ever see? babe. that search was you reaching for yourself. clearing it was the old survival talking. you don't have to keep pretending you're fine \ud83d\udda4 comment shadow and i'll send you my free Villain Archetype quiz",
+  "trigger": [
+   "Connect with Symptoms"
+  ],
+  "format": "Short Form Video",
+  "style": "Talking Head",
+  "division": "talking_head",
+  "posted": "2026-08-12",
+  "rank": 16,
+  "drank": 8
+ },
+ {
+  "handle": "kdmueller",
+  "title": "Choose.",
+  "views": 612,
+  "comments": 0,
+  "likes": 14,
+  "outlier": 0.51,
+  "followers": 1193,
+  "video_url": "https://www.instagram.com/reel/Db9dEawBX3-/",
+  "audio_url": "https://www.instagram.com/reels/audio/816335062086505/",
+  "hook": "",
+  "transcript": "",
+  "caption": "Choose.\nFive avatars, four offers, seven half-built versions, all open, all safe. You call it staying flexible. It\u2019s not.\nIt\u2019s a very smart woman avoiding the moment she commits and finds out if she can win with one thing.\nOptions feel like progress. They\u2019re a hiding spot with a spreadsheet.\nPick one avatar, one offer, and go all in for ninety days.\nNot forever. Ninety days.\n\nComment ALIGNED if you\u2019re ready to stop circling the decision and actually choose.",
+  "trigger": [],
+  "format": "Short Form Video",
+  "style": "B - Roll + Text",
+  "division": "broll",
+  "posted": "2026-08-13",
+  "rank": 17,
+  "drank": 9
+ },
+ {
+  "handle": "erseaberg",
+  "title": "Good operations means the business survives you leaving the room. Comment SOUNDBOARD and let\u2019s build yours to run withou",
+  "views": 566,
+  "comments": 0,
+  "likes": 43,
+  "outlier": 0.75,
+  "followers": 756,
+  "video_url": "https://www.instagram.com/p/Db6m1GoAXPF/",
+  "audio_url": "https://instagram.ftlc1-2.fna.fbcdn.net/o1/v/t2/f2/m78/AQO10OjqBA4AeZGxMODwE_S3-yxzE_sdXR9XbVJIPYA5OMsv6zyJAKbKAhklraM9GuzHppgM0f5NPG7bRnUzT1a93A7LPeqP6d4YE1U.mp4?_nc_cat=110&_nc_oc=AdpKnPDgMFEB2XMcXCOUFKiGfugb_ZFrI8F_V5KKCSpYm9HiMT15ilOqTlBuOhbNt5AbMPs0Ao4Sw7OTkNO0XDX-&_nc_sid=9ca052&_nc_ht=instagram.ftlc1-2.fna.fbcdn.net&_nc_ohc=kMxXybKnUQAQ7kNvwFJuNVW&efg=eyJ2ZW5jb2RlX3RhZyI6ImlnLXhwdmRzLmNsaXBzLmMyLUMzLmRhc2hfbG5faGVhYWNfdmJyM19hdWRpbyIsInZpZGVvX2lkIjpudWxsLCJvaWxfdXJsZ2VuX2FwcF9pZCI6OTM2NjE5NzQzMzkyNDU5LCJjbGllbnRfbmFtZSI6ImlnIiwieHB2X2Fzc2V0X2lkIjoxMDc1NjA4NjY4MzMxNzI5LCJhc3NldF9hZ2VfZGF5cyI6MywidmlfdXNlY2FzZV9pZCI6MTA4MjcsImR1cmF0aW9uX3MiOjY1LCJiaXRyYXRlIjo1MjgzOCwidXJsZ2VuX3NvdXJjZSI6Ind3dyJ9&ccb=17-1&_nc_gid=5jNU3cSQdV9-MKLTnVOfiQ&_nc_zt=28&_nc_ss=7a22e&oh=00_AQGCKuz4AqBxdoiw0HGGwoHWNF04p-MvHMJ3_ASK9crQSw&oe=6A819A0F",
+  "hook": "The most important thing I ever did as COO was document my own job",
+  "transcript": "The most important thing I ever did as COO was document my own job so well that my replacement could run it without me.\nWhen I was promoted to COO of a wedding company, I did something that sounds literally so backwards.\nInstead of making myself indispensable, I spent my time making myself unnecessary because I knew that that was the actual job.\nSo I wrote down how everything ran, built the training protocols, and then hired and trained my own replacement for lead planner, handing them a business that made sense on paper instead of only in my head.\nMost people cling to being the only one who knows how things work because it feels like job security, but it's actually the opposite.\nIf the business can't run without you, you don't own a business, you own a very demanding position that you can't quit.\nI've done the same thing across four different organizations at this point, and every time the measure of good operations was exactly the same.\nCould someone else step in and keep it running without a panic?\nAnd if yes, then the foundation was real.\nThe goal for your business is exactly the same.\nBuild it so it doesn't need you in the room because that is the only version of ownership that actually gives you your life back.",
+  "caption": "Good operations means the business survives you leaving the room. Comment SOUNDBOARD and let\u2019s build yours to run without you.",
+  "trigger": [
+   "Elevate Authority"
+  ],
+  "format": "Short Form Video",
+  "style": "Talking Head",
+  "division": "talking_head",
+  "posted": "2026-08-11",
+  "rank": 18,
+  "drank": 9
+ },
+ {
+  "handle": "altaredstatesofconsciousness",
+  "title": "i see so many of you saying i\u2019m fine in the exact tone that means you haven\u2019t been fine in a really long time.",
+  "views": 499,
+  "comments": 0,
+  "likes": -1,
+  "outlier": 0.01,
+  "followers": 44885,
+  "video_url": "https://www.instagram.com/p/Db6qkuNBAE-/",
+  "audio_url": "https://scontent-cdg4-2.cdninstagram.com/o1/v/t2/f2/m78/AQORMgQ4uZMVO6yUp616WfT90X0JdaLiWUztdG37d43hNkWPuS1LDN9PioUY7sPBqDVj3N_1OdyW00d4Cf0e4ZkklFqH9_hukWlkAHw.mp4?_nc_cat=109&_nc_sid=9ca052&_nc_ht=scontent-cdg4-2.cdninstagram.com&_nc_ohc=B02F6t_CIwQQ7kNvwExz7G-&efg=eyJ2ZW5jb2RlX3RhZyI6ImlnLXhwdmRzLmNsaXBzLmMyLUMzLmRhc2hfbG5faGVhYWNfdmJyM19hdWRpbyIsInZpZGVvX2lkIjpudWxsLCJvaWxfdXJsZ2VuX2FwcF9pZCI6OTM2NjE5NzQzMzkyNDU5LCJjbGllbnRfbmFtZSI6ImlnIiwieHB2X2Fzc2V0X2lkIjoyOTUxMzQzODk1MjAyMTgzLCJhc3NldF9hZ2VfZGF5cyI6MywidmlfdXNlY2FzZV9pZCI6MTAwOTksImR1cmF0aW9uX3MiOjgsImJpdHJhdGUiOjcxMjkxLCJ1cmxnZW5fc291cmNlIjoid3d3In0%3D&ccb=17-1&_nc_gid=hjXrUtG0kl0wFpHpaEC1Tg&_nc_ss=7a22e&_nc_zt=28&oh=00_AQEDWjalFR4RrNDl7blZra56NfcEJM9k-Zun_VrNp_z7pg&oe=6A817436",
+  "hook": "I ain't, I ain't, I ain't, I ain't, I ain't No, sir, bitch, I",
+  "transcript": "I ain't, I ain't, I ain't, I ain't, I ain't No, sir, bitch, I pulled up in a I ain't roaster Talk too much, told that bitch, no, sir And I'm fuckin' cryin' on my fuckin' chauffeur Hundred dollars stakin' on like the texture You can die today, just scratch out yester Dollars in my ring, money like a wrestler Took the weight of good, it was a good gesture It's your will, bulletproof, I'll be the tester Check that shit out, every damn semester Pulled up in the club, had to change the weather Put that bitch out, she's fuckin' seekin' shelter They askin' what I want, I said, I want forever Bitch, he called my phone, I had to send an error",
+  "caption": "i see so many of you saying i\u2019m fine in the exact tone that means you haven\u2019t been fine in a really long time.\n\nthere\u2019s an i\u2019m fine that\u2019s true and an i\u2019m fine that\u2019s a locked door, and i can hear the difference through a screen, sweetie. \n\nsaying you\u2019re okay in that flat little tone isn\u2019t lying. it\u2019s the oldest survival skill you have. but you don\u2019t have to guard the door with everyone. some of us can hold the real answer \ud83d\udda4",
+  "trigger": [
+   "Connect with Symptoms"
+  ],
+  "format": "Short Form Video",
+  "style": "Talking Head",
+  "division": "talking_head",
+  "posted": "2026-08-11",
+  "rank": 19,
+  "drank": 10
+ },
+ {
+  "handle": "kdmueller",
+  "title": "picture this instead. you hand something off, a real thing, and you never touch it again.",
+  "views": 278,
+  "comments": 0,
+  "likes": 15,
+  "outlier": 0.23,
+  "followers": 1193,
+  "video_url": "https://www.instagram.com/reel/Db95vFkhVSI/?igsh=OWZiNmZnbXd6Mmds&igsi=OWZiNmZnbXd6Mmds",
+  "audio_url": "https://www.instagram.com/reels/audio/2182945188490581/",
+  "hook": "",
+  "transcript": "Can't breathe, uh Can't dance, can't",
+  "caption": "picture this instead. you hand something off, a real thing, and you never touch it again.\nno checking. no fixing it at 10pm. no redoing it quietly so it\u2019s right.\nit just gets handled, by someone else, and the world does not end.\nthat\u2019s not laziness, that\u2019s leadership. the version of you that can let it be done imperfectly is the one who finally rests.\ncomment BACKBONE and i\u2019ll show you the first handoff.",
+  "trigger": [],
+  "format": "Short Form Video",
+  "style": "B - Roll + Text",
+  "division": "broll",
+  "posted": "2026-08-13",
+  "rank": 20,
+  "drank": 10
+ },
+ {
+  "handle": "revivetherapyservices",
+  "title": "If you think the harsh inner voice is what keeps you sharp, read that fourth point again. Comment \"[CRITIC]\" and I'll se",
+  "views": 272,
+  "comments": 0,
+  "likes": 10,
+  "outlier": 0.18,
+  "followers": 1519,
+  "video_url": "https://www.instagram.com/p/Dbyt9IRDNKI/",
+  "audio_url": "https://instagram.ffor50-1.fna.fbcdn.net/o1/v/t2/f2/m78/AQNpJAdxnrF9CR4e-xnswhFC0Yz6jaAMsVStQ9r27ar0cL-7m3X-IayFG2ngz7GTsIxocMTYpVBDOf-xksTzgeMTMwEUpIgiO8bHwKw.mp4?_nc_cat=108&_nc_oc=AdoBkx3Xftj-dSxiO4uW9gFDVCTAWEZn8stZBM9sJjbzvxo3-7MnYEFZ_0-u9WSaR5k&_nc_sid=9ca052&_nc_ht=instagram.ffor50-1.fna.fbcdn.net&_nc_ohc=PEgGLf2ZqZEQ7kNvwG07SjE&efg=eyJ2ZW5jb2RlX3RhZyI6ImlnLXhwdmRzLmNsaXBzLmMyLUMzLmRhc2hfbG5faGVhYWNfdmJyM19hdWRpbyIsInZpZGVvX2lkIjpudWxsLCJvaWxfdXJsZ2VuX2FwcF9pZCI6OTM2NjE5NzQzMzkyNDU5LCJjbGllbnRfbmFtZSI6ImlnIiwieHB2X2Fzc2V0X2lkIjoxODA5NDM4NjA1MzQ1NDY0OCwiYXNzZXRfYWdlX2RheXMiOjYsInZpX3VzZWNhc2VfaWQiOjEwMDk5LCJkdXJhdGlvbl9zIjoxNzcsImJpdHJhdGUiOjUwNzQ5LCJ1cmxnZW5fc291cmNlIjoid3d3In0%3D&ccb=17-1&_nc_gid=klIk8M7-gc_IypIScSxsYA&_nc_zt=28&_nc_ss=7a22e&oh=00_AQEji0_JJwQTqeLFzzuAU4gdkA7facEBUvJpEyQythZyZw&oe=6A819FA5",
+  "hook": "Being cruel to yourself has never once gotten you an inch further in your",
+  "transcript": "Being cruel to yourself has never once gotten you an inch further in your healing These are for my people who constantly have that inner critic running in the background Calling you stupid when you don't know something Saying that you're lazy because you're trying to take some rest saying that you're never enough because your friendships aren't where you think they should be and Here's the thing that criticism We've kind of contorted that into thinking that's what makes us disciplined Right, like it's keeping us on track and that inner critic part is Oftentimes are hitting us so hard with all of those criticisms because it believes that if it didn't do that You would fall off the edge.\nYou would become a blob.\nYou would stop investing in friendships You would stop trying so it has become this military sergeant To get you in line What actually is happening though is that part was developed because of trauma most likely for a lot of people It's a strategy that your body learned at a young age that When someone else pointed out a flaw You now adapted to that and said I'm now going to point out this flaw in me to shoot myself in the foot Before someone else gets the chance to and here's the thing I know you know that talking to yourself in that horrible way doesn't actually move the needle for you But you just can't get it to stop it's like on autopilot So here is my advice as a trauma therapist To decrease that negative Critic that's always yelling at you.\nYou need to befriend it What I mean is the more you resist that self critic the more it's gonna come back screaming in your face And you know that I'm right because you've experienced it When we befriend these parts like this inner critic we're not saying hey beat the shit out of me we're getting to know it almost as if It's a friend of ours That's just trying to protect us But it never was taught how to protect us in a healthy adaptive way And so is it really its fault that the only way it learned how to p",
+  "caption": "If you think the harsh inner voice is what keeps you sharp, read that fourth point again. Comment \"[CRITIC]\" and I'll send you the first step to turning down the volume.",
+  "trigger": [
+   "Speak to Gaps and Mistakes"
+  ],
+  "format": "Short Form Video",
+  "style": "Talking Head",
+  "division": "talking_head",
+  "posted": "2026-08-08",
+  "rank": 21,
+  "drank": 11
+ },
+ {
+  "handle": "altaredstatesofconsciousness",
+  "title": "if you think you might be too broken to actually be helped, i want you to know something, because i thought it too.",
+  "views": 250,
+  "comments": 1,
+  "likes": -1,
+  "outlier": 0.01,
+  "followers": 44885,
+  "video_url": "https://www.instagram.com/p/Db7Mk_PsoB_/",
+  "audio_url": "https://instagram.fbod1-1.fna.fbcdn.net/o1/v/t2/f2/m78/AQPrEh12IsTvDVclANSqdVfiEMiQYFRV7bWn0WH3cEtTirYm6HCSZtr2KwLQ3yTvDvJIE-tvv_MVVhwocipCOispgd6SWbyb189lvHw.mp4?_nc_cat=108&_nc_oc=AdpoX3kFr-9wY6_nb4HtrRl3Mxtysob7l91FpeqhxDTb698HwfeT2iftBR_AvTXj7bU&_nc_sid=9ca052&_nc_ht=instagram.fbod1-1.fna.fbcdn.net&_nc_ohc=hy_gUOiMzZQQ7kNvwHOL8Sg&efg=eyJ2ZW5jb2RlX3RhZyI6ImlnLXhwdmRzLmNsaXBzLmMyLUMzLmRhc2hfbG5faGVhYWNfdmJyM19hdWRpbyIsInZpZGVvX2lkIjpudWxsLCJvaWxfdXJsZ2VuX2FwcF9pZCI6OTM2NjE5NzQzMzkyNDU5LCJjbGllbnRfbmFtZSI6ImlnIiwieHB2X2Fzc2V0X2lkIjoxNDA0MzU0NDk0OTQ3MTMxLCJhc3NldF9hZ2VfZGF5cyI6MiwidmlfdXNlY2FzZV9pZCI6MTAwOTksImR1cmF0aW9uX3MiOjEwLCJiaXRyYXRlIjo2ODMxNiwidXJsZ2VuX3NvdXJjZSI6Ind3dyJ9&ccb=17-1&_nc_gid=vAY3tu-8qObxB8y2TUTqnA&_nc_ss=7a22e&_nc_zt=28&oh=00_AQGnUdvVF-TKldv4qGGUEFFHl4s_Cpxi1QMXHaMYSu2Jiw&oe=6A8184B5",
+  "hook": "I guess you're just what I needed, I needed someone to feed, I guess",
+  "transcript": "I guess you're just what I needed, I needed someone to feed, I guess you're just what I needed",
+  "caption": "if you think you might be too broken to actually be helped, i want you to know something, because i thought it too.\n\nthe question underneath almost every dm i get is am i too broken for this. sweetie. nothing you bring to this work is going to shock me, scare me, or make me judge you. \n\ni've been in the dark places you're afraid to name. you are not too broken. you've just been doing this alone, and you were never meant to \ud83d\udda4",
+  "trigger": [
+   "Overcome Objections"
+  ],
+  "format": "Short Form Video",
+  "style": "Talking Head",
+  "division": "talking_head",
+  "posted": "2026-08-12",
+  "rank": 22,
+  "drank": 12
+ },
+ {
+  "handle": "jolihappynails",
+  "title": "If you assume your clients can't afford more, comment \"BUILDER\" and I'll DM you the link to the call that'll make your p",
+  "views": 221,
+  "comments": 0,
+  "likes": 17,
+  "outlier": 0.08,
+  "followers": 2872,
+  "video_url": "https://www.instagram.com/p/Db9ySb0Jd5T/",
+  "audio_url": "https://www.instagram.com/reels/audio/28055153177472246/",
+  "hook": "",
+  "transcript": "Now, techs charging $150 a set are not more talented than you.\nThey just stop deciding for their client that nobody can afford it.\nLet's handle the objection I hear most, which is my client cannot afford a price increase.\nI said it for years, so I'm not judging you.\nI want to show you what is really happening inside that sentence because it is costing you more than any client ever would.\nYou have not actually asked your client, you decided the answer for them.\nMy client cannot afford it usually means I am not comfortable saying the number out loud and rather than sit in that discomfort, you projected it on people who never got to vote.\nThat is your fear wearing their wallet.\nSo the techs who charge more are not braver or more gifted.\nThey simply tested the number instead of assuming it.\nThey raised the rate, a few clients left and the ones who stayed were the quiet, loyal, full rate clients they actually wanted all along.\nThe roaster got smaller and the income got bigger.\nThink about your own regular who has come for a year.\nShe has watched your work get better every single visit and she's still paying the price a nervous beginner set.\nShe's not fragile, she's loyal and loyalty can absorb a fair increase.\nFar more easily than your calendar can absorb another year of undercharging.\nSo run the test, do not run the story.\nRaise it on the next new client first if that feels safer and bring your regulars up with notice.\nThe result you want comes from willingness, letting the market answer a question you have been answering for it and was never about talent.",
+  "caption": "If you assume your clients can't afford more, comment \"BUILDER\" and I'll DM you the link to the call that'll make your price higher and feel obvious to them.",
+  "trigger": [
+   "Overcome Objections"
+  ],
+  "format": "Short Form Video",
+  "style": "Talking Head",
+  "division": "talking_head",
+  "posted": "2026-08-13",
+  "rank": 23,
+  "drank": 13
+ },
+ {
+  "handle": "revivetherapyservices",
+  "title": "A client of mine saved 12,000 dollars once her body finally believed it was safe enough to stop bracing. Comment \"[SAFE]",
+  "views": 198,
+  "comments": 0,
+  "likes": 3,
+  "outlier": 0.13,
+  "followers": 1519,
+  "video_url": "https://www.instagram.com/p/Db00v0yE0rd/",
+  "audio_url": "https://instagram.fnap3-1.fna.fbcdn.net/o1/v/t2/f2/m78/AQNBQWgJVqkdF9GoFlikqsPS_yq_62MlfCKRrSnCmda_kuBvlZDfaIE3dSiY0pEv_DXWEzrYNQ7ScDx5Qt5IWdf2BGMFSBsRJMfXBI4.mp4?_nc_cat=103&_nc_oc=AdoZsqx0TLw9XZlrlMeDodTo8posRbdJOVxVwqp0KVpGz5KWt-UU7QVjQ0cZvQXHnvI&_nc_sid=9ca052&_nc_ht=instagram.fnap3-1.fna.fbcdn.net&_nc_ohc=10BxErhX0SQQ7kNvwFQZa2w&efg=eyJ2ZW5jb2RlX3RhZyI6ImlnLXhwdmRzLmNsaXBzLmMyLUMzLmRhc2hfbG5faGVhYWNfdmJyM19hdWRpbyIsInZpZGVvX2lkIjpudWxsLCJvaWxfdXJsZ2VuX2FwcF9pZCI6OTM2NjE5NzQzMzkyNDU5LCJjbGllbnRfbmFtZSI6ImlnIiwieHB2X2Fzc2V0X2lkIjoxODA5NDQ3NTkwOTQ1NDY0OCwiYXNzZXRfYWdlX2RheXMiOjUsInZpX3VzZWNhc2VfaWQiOjEwMDk5LCJkdXJhdGlvbl9zIjo5MSwiYml0cmF0ZSI6NTE5MTksInVybGdlbl9zb3VyY2UiOiJ3d3cifQ%3D%3D&ccb=17-1&_nc_gid=Qn1WQ92lBaPkuo4U7CQSNw&_nc_map=urlgen_bucketless&_nc_zt=28&_nc_ss=7a22e&oh=00_AQEUQMx3FoDaQ2Q0dYFqNx7IMgZPuCaokwVx-ilAF4yoEA&oe=6A81843C",
+  "hook": "I have a client, when we started working together, $0 in savings, living paycheck",
+  "transcript": "I have a client, when we started working together, $0 in savings, living paycheck to paycheck.\nFast forward to working with them, and they now have probably close to 10, 12K saved up, and it wasn't because they got a raise.\nHere's the thing when it comes to trauma, especially complex trauma and money.\nIt makes it really hard for you to plan for the future.\nCPTSD makes it so you're in this chronic state of hyper arousal, hyper vigilance, nothing in the world is safe.\nYou're always looking out for danger.\nAnd when your brain is in that mode, it turns off your ability to plan for the future.\nAnd that includes financial planning.\nWith this specific client, once we were able to bring her body back down to a place where safety was actually accessible, that's when that future planning part of her brain was able to start coming back online, and she was actually able to plan for her future and start putting away money.\nMy point is, maybe your issues with spending money don't actually have to do with money itself.\nIt has to do with a safety issue within your body.\nAnd maybe, just maybe, the treatment plan for that is to bring that safety back using bottom-up measures like EMDR, somatic experiencing, IFS, all that fun shit.\nThat's what I mean when I say therapy is an investment.\nIt's not just a money set, guys.",
+  "caption": "A client of mine saved 12,000 dollars once her body finally believed it was safe enough to stop bracing. Comment \"[SAFE]\" and I'll send you my Therapize Yourself worksheet so you can start where she did.",
+  "trigger": [
+   "Results & Testimonials"
+  ],
+  "format": "Short Form Video",
+  "style": "Talking Head",
+  "division": "talking_head",
+  "posted": "2026-08-09",
+  "rank": 24,
+  "drank": 14
+ },
+ {
+  "handle": "altaredstatesofconsciousness",
+  "title": "everyone's going to tell you this is the wrong goal. but shadow work will not make you more palatable, sweetie. it will",
+  "views": 171,
+  "comments": 0,
+  "likes": -1,
+  "outlier": 0.0,
+  "followers": 44885,
+  "video_url": "https://www.instagram.com/p/Db9cic9SiWn/",
+  "audio_url": "https://scontent-qro3-1.cdninstagram.com/o1/v/t2/f2/m78/AQON7cwheKAMnYdnxe4xbBD7yhbco1PI38qmIJdc9g2A_O-TE_X6KkF0Pg68JS-nZDOWCxcEAC9NVkroSGbzSg2jNGkQsJN_G0JO1kk.mp4?_nc_cat=109&_nc_sid=9ca052&_nc_ht=scontent-qro3-1.cdninstagram.com&_nc_ohc=wJSksP1wZJkQ7kNvwH4nOw-&efg=eyJ2ZW5jb2RlX3RhZyI6ImlnLXhwdmRzLmNsaXBzLmMyLUMzLmRhc2hfbG5faGVhYWNfdmJyM19hdWRpbyIsInZpZGVvX2lkIjpudWxsLCJvaWxfdXJsZ2VuX2FwcF9pZCI6OTM2NjE5NzQzMzkyNDU5LCJjbGllbnRfbmFtZSI6ImlnIiwieHB2X2Fzc2V0X2lkIjo5MzM0ODI5MjU3MjI4NDAsImFzc2V0X2FnZV9kYXlzIjoxLCJ2aV91c2VjYXNlX2lkIjoxMDA5OSwiZHVyYXRpb25fcyI6MjIsImJpdHJhdGUiOjUwODQ5LCJ1cmxnZW5fc291cmNlIjoid3d3In0%3D&ccb=17-1&_nc_gid=kaPvaW2A7mD6vYREEkhexg&_nc_zt=28&_nc_ss=7a22e&oh=00_AQHaQqUbINfOsYnMKr6B5wIEOa4XUBEm_0TcJaO8k8mT-w&oe=6A81799E",
+  "hook": "Shadow work will not make you more palatable. If you want to be easier",
+  "transcript": "Shadow work will not make you more palatable.\nIf you want to be easier to swallow, please hire someone else.\nEveryone's going to tell you healing should make you nicer, softer, easier to be around.\nThis work doesn't make you smaller, it makes you more honest.\nYou might get less agreeable and a lot more free.\nI've watched it happen over and over.\nWomen stop performing okay and start telling the truth.",
+  "caption": "everyone's going to tell you this is the wrong goal. but shadow work will not make you more palatable, sweetie. it will make you more yourself, and sometimes those are opposite directions. if what you actually want is to be easier for other people to digest, this isn't the work for you. i'll die on this hill \ud83d\udda4",
+  "trigger": [
+   "Villains & Differentiation"
+  ],
+  "format": "Short Form Video",
+  "style": "Talking Head",
+  "division": "talking_head",
+  "posted": "2026-08-13",
+  "rank": 25,
+  "drank": 15
+ },
+ {
+  "handle": "revivetherapyservices",
+  "title": "You can name what they did without handing them a diagnosis first. Comment \"[SAFE]\" and I'll send you where the real wor",
+  "views": 137,
+  "comments": 0,
+  "likes": 7,
+  "outlier": 0.09,
+  "followers": 1519,
+  "video_url": "https://www.instagram.com/p/Dbyfp3mEV46/",
+  "audio_url": "https://scontent-ams2-1.cdninstagram.com/o1/v/t2/f2/m78/AQP3iSdoUoLSUd-2Pa11V5zvRN1s7pj1FMcMG1WsAePITgEe3D6tnQwoeP2-ZuOuOMZrXE7oC5ke99xZDiWtFB6r-8Jhbj3v4-Eg6z8.mp4?_nc_cat=109&_nc_sid=9ca052&_nc_ht=scontent-ams2-1.cdninstagram.com&_nc_ohc=vNfYG0zufu4Q7kNvwHEiYd0&efg=eyJ2ZW5jb2RlX3RhZyI6ImlnLXhwdmRzLmNsaXBzLmMyLUMzLmRhc2hfbG5faGVhYWNfdmJyM19hdWRpbyIsInZpZGVvX2lkIjpudWxsLCJvaWxfdXJsZ2VuX2FwcF9pZCI6OTM2NjE5NzQzMzkyNDU5LCJjbGllbnRfbmFtZSI6ImlnIiwieHB2X2Fzc2V0X2lkIjoxODA5NDM3Njg5MTQ1NDY0OCwiYXNzZXRfYWdlX2RheXMiOjYsInZpX3VzZWNhc2VfaWQiOjEwMDk5LCJkdXJhdGlvbl9zIjoxMzIsImJpdHJhdGUiOjUxNDU4LCJ1cmxnZW5fc291cmNlIjoid3d3In0%3D&ccb=17-1&_nc_gid=Lq3rVs__9l7oUGZmt6O1ew&_nc_zt=28&_nc_ss=7a22e&oh=00_AQHEQFTxExwgu2xmqwPDdu4b7g3TTCXA8upzq0Pu_vYLhQ&oe=6A81A1BE",
+  "hook": "Not everyone who hurt you is a narcissist despite what the internet might say",
+  "transcript": "Not everyone who hurt you is a narcissist despite what the internet might say and by swearing they are narcissists might be the thing that's keeping you stuck.\nSocial media right now has convinced like everyone that their ex that hurt them or their friend that hurt them is a narcissist and I promise you not all of these people meet the clinical criteria for narcissistic personality disorder.\nI think we like to put that label on someone because for some reason it creates validation that they did indeed hurt us but here's the thing people in general hurt people sometimes because we're all human and we're not perfect and that does not mean everyone is a narcissist and here's the thing when we take all of our energy and put it on that person that we have deemed a narcissist we're taking the attention and putting it on them instead of turning it on us and helping ourselves create safety and healing with it.\nDemonizing that person can feel so powerful and does it really change anything in your body?\nNow don't get me wrong being self-aware of how someone hurt you is a good thing but here's the thing when we become so in our heads and we know the attachment style and we know the diagnosis we're giving them and the research says X Y & Z but those things don't actually help us change the way we feel about ourselves and help our healing.\nEvery hour you spend pointing the finger and diagnosing people is an hour you are missing out on attending to yourself and your own needs and also even if you are right even if they do have narcissistic personality disorder does that really regulate and heal your body at the end of the day?\nHere's the thing you are allowed to say how they treated you was fucked up but we need to take that next step and then turn inward and tend to ourselves and tend to that bracing we're constantly having that tightness that despair we're feeling it hurt 100% it hurt and focusing on them doesn't help you heal.",
+  "caption": "You can name what they did without handing them a diagnosis first. Comment \"[SAFE]\" and I'll send you where the real work actually starts!",
+  "trigger": [
+   "Villains & Differentiation"
+  ],
+  "format": "Short Form Video",
+  "style": "Talking Head",
+  "division": "talking_head",
+  "posted": "2026-08-08",
+  "rank": 26,
+  "drank": 16
+ },
+ {
+  "handle": "jolihappynails",
+  "title": "If you're doing fills because full removals feel too slow, comment \"BUILDER\" and I'll DM you the one-bit removal that ma",
+  "views": 134,
+  "comments": 0,
+  "likes": 18,
+  "outlier": 0.05,
+  "followers": 2872,
+  "video_url": "https://www.instagram.com/p/Db48ikwPIcg/",
+  "audio_url": "https://scontent-bos5-1.cdninstagram.com/o1/v/t2/f2/m78/AQNNmB6wSUez5bPS1LqGYhvmHH86mqxTscExqje_9mhB-P8aQr18unMis01t_nXo9Vo5F7-Q7deZOdqugZZLPHleptOPwFmMINsnqFI.mp4?_nc_cat=106&_nc_sid=9ca052&_nc_ht=scontent-bos5-1.cdninstagram.com&_nc_ohc=mqFqUPawZzIQ7kNvwFdNFom&efg=eyJ2ZW5jb2RlX3RhZyI6ImlnLXhwdmRzLmNsaXBzLmMyLUMzLmRhc2hfbG5faGVhYWNfdmJyM19hdWRpbyIsInZpZGVvX2lkIjpudWxsLCJvaWxfdXJsZ2VuX2FwcF9pZCI6OTM2NjE5NzQzMzkyNDU5LCJjbGllbnRfbmFtZSI6ImlnIiwieHB2X2Fzc2V0X2lkIjoxMDc4Nzc0NDQxMzQwMjU4LCJhc3NldF9hZ2VfZGF5cyI6MywidmlfdXNlY2FzZV9pZCI6MTA4MjcsImR1cmF0aW9uX3MiOjExNSwiYml0cmF0ZSI6NTc0MTIsInVybGdlbl9zb3VyY2UiOiJ3d3cifQ%3D%3D&ccb=17-1&_nc_gid=uEjI-DdKT660bvIDH8EciA&_nc_ss=7a22e&_nc_zt=28&oh=00_AQHcPP_Xa_oH2HwJ__pN4AL7OcShGE_4AhOgzU1EiFNSoA&oe=6A8184E3",
+  "hook": "No tax. If your calendar is full of fills, you are paying a tax",
+  "transcript": "No tax.\nIf your calendar is full of fills, you are paying a tax every single week because you were afraid to do the removal correctly the first time.\nSo let's chat about fills for a second.\nBecause the whole industry treats them like the smart, efficient choice and is to believe that too.\nA fill feels faster.\nYou're not removing everything.\nYou are just topping up the growth and you tell yourself you saved 20 minutes.\nYou did not save 20 minutes to move them.\nEvery fill leaves old product behind and old product hides lifting and debris in the middle of the nail that you cannot see under fresh gel.\nTwo, three fills later, you are chasing a set that keeps failing and you cannot figure out why.\nA fill is a tax you pay because the removal underneath scared you.\nThat is the honest version.\nWhen removal is slow and messy, of course you avoid it.\nSo you keep layering on top and hoping the foundation holds.\nIt does not hold and the client feels the bulk before she can explain it.\nI know the fix is boring and it is the whole game.\nDo a full overlay every time, remove 95 to 99 percent, start clean, rebuild the structure with less product, and you get a set that lasts because there's nothing rotten underneath it.\nLess is more was never a slogan, actually was a removal standard.\nI know a full removal feel risky when your days are packed, but the packed day is caused by the fills because every failing set comes back as a midweek fix.\nDo the removal and the midweek texts stop, and suddenly your chair feels calm.",
+  "caption": "If you're doing fills because full removals feel too slow, comment \"BUILDER\" and I'll DM you the one-bit removal that makes a full overlay faster than your fill.",
+  "trigger": [
+   "Speak to Gaps and Mistakes"
+  ],
+  "format": "Short Form Video",
+  "style": "Talking Head",
+  "division": "talking_head",
+  "posted": "2026-08-11",
+  "rank": 27,
+  "drank": 17
+ },
+ {
+  "handle": "jolihappynails",
+  "title": "If \"I'm still learning\" has been your reason to not raise your rate, comment \"RETENTION\" and I'll DM you the free call s",
+  "views": 134,
+  "comments": 1,
+  "likes": 19,
+  "outlier": 0.05,
+  "followers": 2872,
+  "video_url": "https://www.instagram.com/p/Db7HLPsAFQ8/",
+  "audio_url": "https://instagram.fyxd3-1.fna.fbcdn.net/o1/v/t2/f2/m78/AQN4n5OpqaCtz8UVup_a3E6SypMucIWBHA5FTeA7ZKiNZMiqFG4VY_9vVg_5jDWU9LrFXV53t5LxySyTEW5HVE9PdbxlH1W_vuPesKE.mp4?_nc_cat=105&_nc_oc=AdrlKQwRtO5DXMsPB3vNDz0gelHKQOQs_Rm-ZRqHcHMoRbJoNdLt1uAMPaHbSU4GPgnenJulxIjgZR0zBDl-Sxls&_nc_sid=9ca052&_nc_ht=instagram.fyxd3-1.fna.fbcdn.net&_nc_ohc=LQ8x3Ka16n4Q7kNvwFoFngH&efg=eyJ2ZW5jb2RlX3RhZyI6ImlnLXhwdmRzLmNsaXBzLmMyLUMzLmRhc2hfbG5faGVhYWNfdmJyM19hdWRpbyIsInZpZGVvX2lkIjpudWxsLCJvaWxfdXJsZ2VuX2FwcF9pZCI6OTM2NjE5NzQzMzkyNDU5LCJjbGllbnRfbmFtZSI6ImlnIiwieHB2X2Fzc2V0X2lkIjoxOTc3MTMzOTc5NjEyMjE0LCJhc3NldF9hZ2VfZGF5cyI6MiwidmlfdXNlY2FzZV9pZCI6MTA4MjcsImR1cmF0aW9uX3MiOjEwMywiYml0cmF0ZSI6NTgwODMsInVybGdlbl9zb3VyY2UiOiJ3d3cifQ%3D%3D&ccb=17-1&_nc_gid=ERTv8WF-U7QUMuJ7XKjDBQ&_nc_zt=28&_nc_ss=7a22e&oh=00_AQHZIQPza0cCBGfQuDN0VuOf7MTlP1ioklh4_V5JEA3zhA&oe=6A819E06",
+  "hook": "No tax. You will not charge what your hands are worth as long as",
+  "transcript": "No tax.\nYou will not charge what your hands are worth as long as you keep telling yourself the same quiet sentence.\nI'm still learning.\nThere is a sentence a lot of us hide behind, and it sounds humble, so nobody questions it.\nI'm still learning.\nIt feels responsible to say.\nThe problem is that it has no finish line, so quietly gives you permission to postpone the prize, positioning, and the launch, sometimes for years.\nI lived inside that sentence for longer than I want to admit.\nI kept treating myself as almost ready, always one more course away from being allowed to charge properly.\nMeanwhile, my hands were already doing the premium work, and my rate was stuck where a beginner would set it.\nAsk yourself when you first set your current price.\nFor most techs, the honest answer is a version of you from two or three years ago, someone with less skill, and you never went back to update the number because still learning felt safer than the confrontation.\nLearning never stops, and it should not, but it's not the thing standing between you and a higher rate.\nRemoval is clean, your structure holds, your clients rebook.\nThose are the facts.\nStill learning is the story you tell, so you never have to test whether the market agrees with the facts.\nSeparate the two, keep learning forever, that is the craft.\nAnd this week, look at the client who has been with you a year and set the price you would set if you fully believed what your hands already know.\nShe has been waiting for you to catch up to yourself.",
+  "caption": "If \"I'm still learning\" has been your reason to not raise your rate, comment \"RETENTION\" and I'll DM you the free call so you can start pricing for the tech you already are.",
+  "trigger": [
+   "Speak to Gaps and Mistakes"
+  ],
+  "format": "Short Form Video",
+  "style": "Talking Head",
+  "division": "talking_head",
+  "posted": "2026-08-12",
+  "rank": 28,
+  "drank": 18
+ },
+ {
+  "handle": "kdmueller",
+  "title": "you set the standard and apologize for it in the same sentence, then wonder why it\u2019s ignored.",
+  "views": 132,
+  "comments": 0,
+  "likes": 3,
+  "outlier": 0.11,
+  "followers": 1193,
+  "video_url": "https://www.instagram.com/reel/Db8p5IQTXMH/",
+  "audio_url": "https://www.instagram.com/reels/audio/27904045379206148/",
+  "hook": "",
+  "transcript": "",
+  "caption": "you set the standard and apologize for it in the same sentence, then wonder why it\u2019s ignored.\nthe sorry discounts the ask before it lands.\ncomment ALIGNED for the clean version.",
+  "trigger": [],
+  "format": "Short Form Video",
+  "style": "B - Roll + Text",
+  "division": "broll",
+  "posted": "2026-08-12",
+  "rank": 29,
+  "drank": 11
+ },
+ {
+  "handle": "kdmueller",
+  "title": "where is it, what\u2019s the plan, how do we fix it. every. single. time.",
+  "views": 106,
+  "comments": 0,
+  "likes": 4,
+  "outlier": 0.09,
+  "followers": 1193,
+  "video_url": "https://www.instagram.com/p/Db-l6Q_Tx7P/",
+  "audio_url": "https://www.instagram.com/reels/audio/26616213374744147/",
+  "hook": "",
+  "transcript": "",
+  "caption": "where is it, what\u2019s the plan, how do we fix it. every. single. time.\nhere\u2019s the part that stings, girl: you built that. you answered fast for years because being the one with the answer felt safe, and now you\u2019re the bottleneck you resent. it isn\u2019t them being helpless. it\u2019s a system that runs through you on purpose.\nstop answering the next question with the answer. answer it with a question.\ncomment ALIGNED and i\u2019ll show you the swap.",
+  "trigger": [
+   "Connect with Symptoms"
+  ],
+  "format": "Short Form Video",
+  "style": "B - Roll + Text",
+  "division": "broll",
+  "posted": "2026-08-13",
+  "rank": 30,
+  "drank": 12
+ },
+ {
+  "handle": "altaredstatesofconsciousness",
+  "title": "people overcomplicate shadow work on purpose, so here it is with no jargon. it\u2019s not reliving your trauma or blaming you",
+  "views": 104,
+  "comments": 0,
+  "likes": 2,
+  "outlier": 0.0,
+  "followers": 44885,
+  "video_url": "https://www.instagram.com/p/DcAH7AfSZLL/",
+  "audio_url": "https://scontent-ams2-1.cdninstagram.com/o1/v/t2/f2/m78/AQOcN6pe-bUHj8ileiTEftjjn1Cd7uTfdlmGdem9s2EfJQAavyqFewjfqBv6L1R4y88hWN4B6nIH0umxLmBgpy3RrKkfmUXA1zOBazo.mp4?_nc_cat=111&_nc_sid=9ca052&_nc_ht=scontent-ams2-1.cdninstagram.com&_nc_ohc=kjvpR2aNfxYQ7kNvwEfsTan&efg=eyJ2ZW5jb2RlX3RhZyI6ImlnLXhwdmRzLmNsaXBzLmMyLUMzLmRhc2hfbG5faGVhYWNfdmJyM19hdWRpbyIsInZpZGVvX2lkIjpudWxsLCJvaWxfdXJsZ2VuX2FwcF9pZCI6OTM2NjE5NzQzMzkyNDU5LCJjbGllbnRfbmFtZSI6ImlnIiwieHB2X2Fzc2V0X2lkIjoxMzUxODAzMjUzNzUwOTMwLCJhc3NldF9hZ2VfZGF5cyI6MCwidmlfdXNlY2FzZV9pZCI6MTAwOTksImR1cmF0aW9uX3MiOjI3LCJiaXRyYXRlIjo0OTQyNiwidXJsZ2VuX3NvdXJjZSI6Ind3dyJ9&ccb=17-1&_nc_gid=5RVs5StEm8B6vvdlEj4_VQ&_nc_ss=7a22e&_nc_zt=28&oh=00_AQGAO-Dt-vBhgPFa4CO8D9ssuAXauwZzuc5uVeVqAkBTlw&oe=6A8191F8",
+  "hook": "Let me explain what shadow work actually is in the plainest way I can.",
+  "transcript": "Let me explain what shadow work actually is in the plainest way I can.\nNo jargon.\nNo fear-mongering.\nShadow work is not reliving your trauma, and it's not blaming your parents.\nIt's understanding yourself so deeply that your patterns finally start to make sense.\nIt's meeting the parts of you you had to repress because someone told you they were unacceptable.\nAnd realizing those parts were never the problem.\nThey were trying to protect you.",
+  "caption": "people overcomplicate shadow work on purpose, so here it is with no jargon. it\u2019s not reliving your trauma or blaming your parents. it\u2019s understanding yourself so deeply your patterns finally make sense. it\u2019s meeting the parts you were taught to hide and realizing they were never the problem, they were protecting you \ud83d\udda4 start with my free 5-day series, linked in bio.",
+  "trigger": [
+   "Elevate Authority"
+  ],
+  "format": "Short Form Video",
+  "style": "Talking Head",
+  "division": "talking_head",
+  "posted": "2026-08-14",
+  "rank": 31,
+  "drank": 19
+ },
+ {
+  "handle": "erseaberg",
+  "title": "Listen, I say this with so much love, you cannot be the CEO and the bottleneck at the same time. It is one or the other,",
+  "views": 100,
+  "comments": 0,
+  "likes": 4,
+  "outlier": 0.13,
+  "followers": 756,
+  "video_url": "https://www.instagram.com/p/Dbzccf_MDY8/",
+  "audio_url": "https://instagram.fktw1-1.fna.fbcdn.net/o1/v/t2/f2/m78/AQO6NTtxCCv_OAEijitDD2J9dl1K25i-6gDqMCRJXVL2FECEwfvaTi1bmbTIEBVEPjHzZUs_YyapKVMUtBIDhf-ksIvV8shY66z0uVw.mp4?_nc_cat=101&_nc_oc=Adpl6YWmYfjEqIdBL-fLYC_xq7P6McxeuHkw55HyWKOMXdXibYu8dqhOt2-GR9auT7U&_nc_sid=9ca052&_nc_ht=instagram.fktw1-1.fna.fbcdn.net&_nc_ohc=UkLCFN12G3sQ7kNvwG8E7Wx&efg=eyJ2ZW5jb2RlX3RhZyI6ImlnLXhwdmRzLmNsaXBzLmMyLUMzLmRhc2hfbG5faGVhYWNfdmJyM19hdWRpbyIsInZpZGVvX2lkIjpudWxsLCJvaWxfdXJsZ2VuX2FwcF9pZCI6OTM2NjE5NzQzMzkyNDU5LCJjbGllbnRfbmFtZSI6ImlnIiwieHB2X2Fzc2V0X2lkIjoxNzE5MzM0NjIzNTI2ODUwLCJhc3NldF9hZ2VfZGF5cyI6NSwidmlfdXNlY2FzZV9pZCI6MTA4MjcsImR1cmF0aW9uX3MiOjQsImJpdHJhdGUiOjc5NTQ0LCJ1cmxnZW5fc291cmNlIjoid3d3In0%3D&ccb=17-1&_nc_gid=AlI4_5nBlKj62ykMrAGggQ&_nc_ss=7a22e&_nc_zt=28&oh=00_AQE1jyM99ZX7AdbhGndapdTodXf2BIkZZ4bVbx1pQY1omw&oe=6A81813E",
+  "hook": "Listen, I say this with so much love, you cannot be the CEO and the bottleneck at the same time. It is one or the other, and right now the business is voting for bottleneck.",
+  "transcript": "",
+  "caption": "Listen, I say this with so much love, you cannot be the CEO and the bottleneck at the same time. It is one or the other, and right now the business is voting for bottleneck.\n\nThe bottleneck is the person every decision waits on, the one whose inbox is the reason things stall, the one who cannot log off because the whole thing runs through her head. That role is exhausting and it is also completely invisible on a title.\n\nThe CEO builds it so the business does not wait on her. The processes are written, the team owns their pieces, and the machine keeps moving whether she is in the room or on the water with her phone face down.\n\nYou do not get to both hold every answer and be free. Pick the identity you actually want, and then build the foundation that makes it true.\n\nFuture you is going to want to hug you so bad for starting this now. Comment SOUNDBOARD and let\u2019s get you out of the bottleneck seat.",
+  "trigger": [
+   "Tap into Identity"
+  ],
+  "format": "Short Form Video",
+  "style": "B - Roll + Text",
+  "division": "broll",
+  "posted": "2026-08-09",
+  "rank": 32,
+  "drank": 13
+ },
+ {
+  "handle": "jananiksa",
+  "title": "You do not have an affordability problem. You have an ask problem. And that one is fixable this week. Comment CLIENTS an",
+  "views": 96,
+  "comments": 0,
+  "likes": 5,
+  "outlier": 0.05,
+  "followers": 2034,
+  "video_url": "https://www.instagram.com/p/Db-2qaXhv7P/",
+  "audio_url": "https://scontent-yyz1-1.cdninstagram.com/o1/v/t2/f2/m78/AQNBdDJPD2XmIAGxyhm4QbTOr26aqLH5md9FCjSCstwQ6RlRIbLn2fQelCMXRRNZW8LUJu6WGk0P99dRpRVs-BKJASN0oHtCiod3MqQ.mp4?_nc_cat=110&_nc_sid=9ca052&_nc_ht=scontent-yyz1-1.cdninstagram.com&_nc_ohc=rA9r2N7rRH8Q7kNvwHWjafA&efg=eyJ2ZW5jb2RlX3RhZyI6ImlnLXhwdmRzLmNsaXBzLmMyLUMzLmRhc2hfbG5faGVhYWNfdmJyM19hdWRpbyIsInZpZGVvX2lkIjpudWxsLCJvaWxfdXJsZ2VuX2FwcF9pZCI6OTM2NjE5NzQzMzkyNDU5LCJjbGllbnRfbmFtZSI6ImlnIiwieHB2X2Fzc2V0X2lkIjoxMDU1NzA2NDYwMTU2OTk1LCJhc3NldF9hZ2VfZGF5cyI6MSwidmlfdXNlY2FzZV9pZCI6MTAwOTksImR1cmF0aW9uX3MiOjEyMSwiYml0cmF0ZSI6NTIyMzIsInVybGdlbl9zb3VyY2UiOiJ3d3cifQ%3D%3D&ccb=17-1&_nc_gid=BUo6ZeSRafsXM9S2vAVP4Q&_nc_zt=28&_nc_ss=7a22e&oh=00_AQFj4_HywAG6gJBF36heQlyOUD_8OHMKYmuEuCRfyWcPJA&oe=6A81757B",
+  "hook": "My audience cannot afford that usually means one thing. When you say my audience",
+  "transcript": "My audience cannot afford that usually means one thing.\nWhen you say my audience can't afford that, the truth is you haven't actually ever asked anyone in your audience whether or not they can afford that, and you probably aren't talking to the premium buyers in your audience right now.\nOften we treat the fact that we hear things like, oh, that's a lot of money, I can't afford it, da, da, da, da, da, as evidence that our audience is broke when in all reality, don't shoot the messenger, we are offering them offers that aren't what they wanna buy.\nSo I wouldn't so much treat it as evidence that your audience is broke, and treat it as evidence that perhaps you haven't put together the offer that they want.\nAnd or the other side of this coin is maybe you haven't been talking to them.\nBecause in all audiences, you have low ticket buyers and you have high ticket buyers.\nAnd more often than not, when clients come to work with me, I see that they are speaking more low ticket buyer language, and for whatever reason, maybe their own projection, they are speaking to the person who's stuck and can't afford it and these types of things, and then wondering why those are the kind of people that they're getting on sales calls with.\nWhen the real truth is if you actually reel it in and zoom out and actually speak to the buyers in your audience that can afford it, and are willing to invest and do understand high ticket, high value, and you can articulate that, they buy.\nBecause at the end of the day, high ticket clients aren't found, they're created.\nAnd if you're not speaking to them right now in your audience, that's why you're hearing things like I can't afford it.\nIt's because you're creating offers for, speaking to, and invested in right now, those in your audience that truly can't.\nIf this is resonating with you, and you wanna understand the magic of how to create premium buyers in your audience right now and make them the offer you've been afraid to make them, commen",
+  "caption": "You do not have an affordability problem. You have an ask problem. And that one is fixable this week. Comment CLIENTS and I will show you how to make the offer you have been avoiding.\n\n#microaudiencetomillions #communicationcreateswealth #highticketcoach",
+  "trigger": [
+   "Overcome Objections"
+  ],
+  "format": "Short Form Video",
+  "style": "Talking Head",
+  "division": "talking_head",
+  "posted": "2026-08-13",
+  "rank": 33,
+  "drank": 20
+ },
+ {
+  "handle": "erseaberg",
+  "title": "Bestie, this one used to sound insane to people, why would the COO deliberately make herself replaceable?",
+  "views": 93,
+  "comments": 0,
+  "likes": 4,
+  "outlier": 0.12,
+  "followers": 756,
+  "video_url": "https://www.instagram.com/p/Db32h67g_nd/",
+  "audio_url": "https://instagram.fpoz3-1.fna.fbcdn.net/o1/v/t2/f2/m78/AQMdTOIrRJN5C3yn9qzqFZ9Gjgj78csNzksYUY6b4IqXym_BC5Sr-SVn_TKSXqU1RlsSoaLBVPRHXyQXe4kCnrtwli-Y5VAW5CeujX8.mp4?_nc_cat=102&_nc_oc=AdpS17V0K5kIg62QZi1TNTfiFVm5lMdFesJ6vSzWZ3o5ZSWc9S-5ElLeO5xMIrXD9VY&_nc_sid=9ca052&_nc_ht=instagram.fpoz3-1.fna.fbcdn.net&_nc_ohc=sZoDYxZdr2gQ7kNvwGzqw5b&efg=eyJ2ZW5jb2RlX3RhZyI6ImlnLXhwdmRzLmNsaXBzLmMyLUMzLmRhc2hfbG5faGVhYWNfdmJyM19hdWRpbyIsInZpZGVvX2lkIjpudWxsLCJvaWxfdXJsZ2VuX2FwcF9pZCI6OTM2NjE5NzQzMzkyNDU5LCJjbGllbnRfbmFtZSI6ImlnIiwieHB2X2Fzc2V0X2lkIjoxMDYyNDI1NzM2MTczNjYyLCJhc3NldF9hZ2VfZGF5cyI6NCwidmlfdXNlY2FzZV9pZCI6MTA4MjcsImR1cmF0aW9uX3MiOjQsImJpdHJhdGUiOjc0ODk5LCJ1cmxnZW5fc291cmNlIjoid3d3In0%3D&ccb=17-1&_nc_gid=Hgi_Nq8rPmbQNKS_lkpNgQ&_nc_ss=7a22e&_nc_zt=28&oh=00_AQEKPmGPL8xad3Bwi9GOFz3VrPcylEPNbVit9hTcqeP_tg&oe=6A819913",
+  "hook": "Bestie, this one used to sound insane to people, why would the COO deliberately make herself replaceable?",
+  "transcript": "",
+  "caption": "Bestie, this one used to sound insane to people, why would the COO deliberately make herself replaceable?\n\nBecause I figured out early that being the only one who knows how everything works is not power, it is a cage with your name on it. If the business needs you awake and available to function, you do not get to have a life, and neither does anyone waiting on you.\n\nSo every operations role I have ever held, I did the same thing. I built the systems, wrote the training, and then hired and trained the person who could run it without me, on purpose, every time.\n\nThat is the whole philosophy behind how I work now. A business should stand on a foundation, not on one exhausted human, and the truest sign it is built right is that it keeps humming when you walk away.\n\nIf you are the only one who knows how your business runs, that is not job security, it is a trap. Comment APPLY and let\u2019s build you out of it.",
+  "trigger": [
+   "Elevate Authority"
+  ],
+  "format": "Short Form Video",
+  "style": "B - Roll + Text",
+  "division": "broll",
+  "posted": "2026-08-10",
+  "rank": 34,
+  "drank": 14
+ },
+ {
+  "handle": "revivetherapyservices",
+  "title": "You built the career and hit the numbers and became the person other people quietly ask for advice, and every bit of tha",
+  "views": 89,
+  "comments": 0,
+  "likes": 1,
+  "outlier": 0.06,
+  "followers": 1519,
+  "video_url": "https://www.instagram.com/p/Dbvqe2vDkOU/",
+  "audio_url": "https://instagram.frex1-1.fna.fbcdn.net/o1/v/t2/f2/m78/AQPs0R59iPGMNhUnh7uuYP_k3D2qq5wIsI7e545YvoRNCsoD0u8JxP4T_Rkr-LKInVzKvPJE1kNq6k12ifuK_nSe4ixuLHTZGjOSau8.mp4?_nc_cat=107&_nc_oc=AdqmmfPjP9XrA74JLIfNbfSnQ29sF9VdumI2ZMjNE6ewmIq9DwBgm8PH37DarlEDCcg&_nc_sid=9ca052&_nc_ht=instagram.frex1-1.fna.fbcdn.net&_nc_ohc=Cc6H0gcRQzcQ7kNvwEzOttT&efg=eyJ2ZW5jb2RlX3RhZyI6ImlnLXhwdmRzLmNsaXBzLmMyLUMzLmRhc2hfbG5faGVhYWNfdmJyM19hdWRpbyIsInZpZGVvX2lkIjpudWxsLCJvaWxfdXJsZ2VuX2FwcF9pZCI6OTM2NjE5NzQzMzkyNDU5LCJjbGllbnRfbmFtZSI6ImlnIiwieHB2X2Fzc2V0X2lkIjoxODA5NDI2MDYwNTQ1NDY0OCwiYXNzZXRfYWdlX2RheXMiOjcsInZpX3VzZWNhc2VfaWQiOjEwMDk5LCJkdXJhdGlvbl9zIjo3LCJiaXRyYXRlIjo2Nzk1OSwidXJsZ2VuX3NvdXJjZSI6Ind3dyJ9&ccb=17-1&_nc_gid=UrLyEVBIXo3OVJ82hMDebA&_nc_zt=28&_nc_ss=7a22e&oh=00_AQHMbnafNqD6I2lH9tmRAnlEovVcJD6mBGgUOmivmJqrgQ&oe=6A8180E8",
+  "hook": "You built the career and hit the numbers and became the person other people quietly ask for advice, and every bit of that is real and you earned it.",
+  "transcript": "",
+  "caption": "You built the career and hit the numbers and became the person other people quietly ask for advice, and every bit of that is real and you earned it.\n\nAnd your nervous system is running on fumes, bracing through the wins, waiting for the other shoe that your body swears is always about to drop.\n\nYou keep waiting to feel as steady on the inside as you look on the outside, and it never quite arrives no matter how much you achieve.\nBoth of these things are true at the same time. The success is real and the exhaustion is real, and one does not cancel the other out or make you a fraud.\n\nThe high functioning and the depleted can live in the same body, because your drive is genuine and your body has just been running survival responses under all of it for years.\n\nYou do not have to burn the whole life down to heal, and you do not have to earn one more thing before you are allowed to feel safe in it.\nYou are a badass bitch whose body simply never got the memo that it is safe now, and that memo is teachable.\n\nComment \"[BOTH]\" and I'll show you what body based work looks like for a woman who has it together on paper. No pressure.",
+  "trigger": [
+   "Tap into Identity"
+  ],
+  "format": "Short Form Video",
+  "style": "B - Roll + Text",
+  "division": "broll",
+  "posted": "2026-08-07",
+  "rank": 35,
+  "drank": 15
+ },
+ {
+  "handle": "erseaberg",
+  "title": "Can we paint the picture for a sec, because I want you to actually feel this one.",
+  "views": 89,
+  "comments": 0,
+  "likes": 8,
+  "outlier": 0.12,
+  "followers": 756,
+  "video_url": "https://www.instagram.com/p/Db38_PwADsd/",
+  "audio_url": "https://scontent-lhr11-1.cdninstagram.com/o1/v/t2/f2/m78/AQP6alIvgywwBmbqnTkkuNbLRr9nrv9HhcvYhqRwbg8o6tk0Y8i-niaHXQd1dmKv1giki8jwopTbss97i5-vt-1KuMPbWSoILKrXF0s.mp4?_nc_cat=104&_nc_sid=9ca052&_nc_ht=scontent-lhr11-1.cdninstagram.com&_nc_ohc=Syrtewt4FkoQ7kNvwFPXrlG&efg=eyJ2ZW5jb2RlX3RhZyI6ImlnLXhwdmRzLmNsaXBzLmMyLUMzLmRhc2hfbG5faGVhYWNfdmJyM19hdWRpbyIsInZpZGVvX2lkIjpudWxsLCJvaWxfdXJsZ2VuX2FwcF9pZCI6OTM2NjE5NzQzMzkyNDU5LCJjbGllbnRfbmFtZSI6ImlnIiwieHB2X2Fzc2V0X2lkIjoyMDYxNzE5ODUxMTE5MTkwLCJhc3NldF9hZ2VfZGF5cyI6NCwidmlfdXNlY2FzZV9pZCI6MTA4MjcsImR1cmF0aW9uX3MiOjgsImJpdHJhdGUiOjk0MzI2LCJ1cmxnZW5fc291cmNlIjoid3d3In0%3D&ccb=17-1&_nc_gid=v7SAmpVLEu-h3Xl669eUoA&_nc_zt=28&_nc_ss=7a22e&oh=00_AQHe3q0PkPMd0ieYe3hat_tU302bwWQmrxMy9djjFFcO6Q&oe=6A8197A9",
+  "hook": "Can we paint the picture for a sec, because I want you to actually feel this one.",
+  "transcript": "",
+  "caption": "Can we paint the picture for a sec, because I want you to actually feel this one.\n\nIt\u2019s a Saturday, you are somewhere you love, maybe the water, maybe just your own backyard, and your phone is face down and quiet. A client is being onboarded right now and you\u2019re not touching a thing, because the process is running the way you built it to.\n\nThat\u2019s not luck and it is not a magic hire. It\u2019s what happens when the business has a foundation, when the team has something to follow, and when your brain is finally not the only place the answers live.\n\nI spent a decade watching founders who never got here, who traded every Saturday for a business that could not breathe without them, and I do not want that for you.\n\nPeace like this is buildable, I promise. Comment SOUNDBOARD and let\u2019s start getting you your weekends back.",
+  "trigger": [
+   "Narrate Desired Outcomes"
+  ],
+  "format": "Short Form Video",
+  "style": "B - Roll + Text",
+  "division": "broll",
+  "posted": "2026-08-10",
+  "rank": 36,
+  "drank": 16
+ },
+ {
+  "handle": "erseaberg",
+  "title": "Bestie, be honest with me, is the plan to fix the mess to go buy one more tool? Because I have watched that movie so man",
+  "views": 84,
+  "comments": 0,
+  "likes": 3,
+  "outlier": 0.11,
+  "followers": 756,
+  "video_url": "https://www.instagram.com/p/Dbyun53A81G/",
+  "audio_url": "https://scontent-syd2-1.cdninstagram.com/o1/v/t2/f2/m78/AQPXec6UZJoIfZ6QIL0H9X1Y-nNxE1NhsEuidrJGG-_xQwRFpklBqeMNMtt4XVeS5JNk80mgJvNbmW3qfjZrSmDB_UJmZDMHxke4-C4.mp4?_nc_cat=111&_nc_sid=9ca052&_nc_ht=scontent-syd2-1.cdninstagram.com&_nc_ohc=GNkUph9hXWIQ7kNvwHn63Od&efg=eyJ2ZW5jb2RlX3RhZyI6ImlnLXhwdmRzLmNsaXBzLmMyLUMzLmRhc2hfbG5faGVhYWNfdmJyM19hdWRpbyIsInZpZGVvX2lkIjpudWxsLCJvaWxfdXJsZ2VuX2FwcF9pZCI6OTM2NjE5NzQzMzkyNDU5LCJjbGllbnRfbmFtZSI6ImlnIiwieHB2X2Fzc2V0X2lkIjo5MDY0MzkzOTIwMjg5NTksImFzc2V0X2FnZV9kYXlzIjo2LCJ2aV91c2VjYXNlX2lkIjoxMDgyNywiZHVyYXRpb25fcyI6NCwiYml0cmF0ZSI6NzUxODYsInVybGdlbl9zb3VyY2UiOiJ3d3cifQ%3D%3D&ccb=17-1&_nc_gid=PdA2SfzLAcsjC5g1PKcstw&_nc_zt=28&_nc_ss=7a22e&oh=00_AQFRfOGppeMG66Mwm2pZw7kobWFZOl0sKzjrUSC7Hd0Eeg&oe=6A819880",
+  "hook": "Bestie, be honest with me, is the plan to fix the mess to go buy one more tool? Because I have watched that movie so many times.",
+  "transcript": "",
+  "caption": "Bestie, be honest with me, is the plan to fix the mess to go buy one more tool? Because I have watched that movie so many times.\n\nHere is what actually happens. More tools do not fix a messy business, they just spread the mess across more logins. Your stuff ends up living in five places, your team is hunting for information all day, and everyone is frustrated including you.\n\nThe reason you are in the hot mess is not that you are missing the right software. It is that your tools and your process were never connected, because the process itself was never built.\n\nSo before you add anything new, simplify what you already have and make sure everyone knows where things live. Build the system on paper first, then let the tech serve it.\n\nThe next subscription will not save you, I promise. Comment SOUNDBOARD and let\u2019s build the thing the tools are supposed to plug into.",
+  "trigger": [
+   "Villains & Differentiation"
+  ],
+  "format": "Short Form Video",
+  "style": "B - Roll + Text",
+  "division": "broll",
+  "posted": "2026-08-08",
+  "rank": 37,
+  "drank": 17
+ },
+ {
+  "handle": "altaredstatesofconsciousness",
+  "title": "\u201cafter just over 9 months, my perspective has changed and i have grown stronger internally. i was in a very dark and neg",
+  "views": 82,
+  "comments": 0,
+  "likes": 1,
+  "outlier": 0.0,
+  "followers": 44885,
+  "video_url": "https://www.instagram.com/p/Db_65N_POoH/",
+  "audio_url": "https://instagram.fssa8-1.fna.fbcdn.net/o1/v/t2/f2/m78/AQNWhl6HjY8Ms0WRuBDuZMTsdn57wgnTv2XOyQpnJtbQ9iIH2rbaZUtOBEbbnuufEj1QHPhnR6BqoR7qgylzQLnvz2jR1Pbnzte8PAw.mp4?_nc_cat=106&_nc_oc=Adoic81OPUFOIkyevDaaumGIgpXctx_07b9MmX48HWWlaAMkQWc84kWBwCkoFRcShBk&_nc_sid=9ca052&_nc_ht=instagram.fssa8-1.fna.fbcdn.net&_nc_ohc=OkzJvpTYX4AQ7kNvwHo3nVc&efg=eyJ2ZW5jb2RlX3RhZyI6ImlnLXhwdmRzLmNsaXBzLmMyLUMzLmRhc2hfbG5faGVhYWNfdmJyM19hdWRpbyIsInZpZGVvX2lkIjpudWxsLCJvaWxfdXJsZ2VuX2FwcF9pZCI6OTM2NjE5NzQzMzkyNDU5LCJjbGllbnRfbmFtZSI6ImlnIiwieHB2X2Fzc2V0X2lkIjo5ODM5MzY1NzEzMzk4MTYsImFzc2V0X2FnZV9kYXlzIjoxLCJ2aV91c2VjYXNlX2lkIjoxMDA5OSwiZHVyYXRpb25fcyI6MTUsImJpdHJhdGUiOjU1NDI5LCJ1cmxnZW5fc291cmNlIjoid3d3In0%3D&ccb=17-1&_nc_gid=teLrQJf5EcQS9MTWr6TKUA&_nc_map=urlgen_bucketless&_nc_zt=28&_nc_ss=7a22e&oh=00_AQGTxbKmavH8yBhGFXbLcCky-wTB37-AhmoDqHPLWT_mig&oe=6A816D1F",
+  "hook": "\u201cafter just over 9 months, my perspective has changed and i have grown stronger internally. i was in a very dark and negative spot when i first met stephanie.\u201d this is what the work actually looks lik",
+  "transcript": "",
+  "caption": "\u201cafter just over 9 months, my perspective has changed and i have grown stronger internally. i was in a very dark and negative spot when i first met stephanie.\u201d this is what the work actually looks like, babe. not a 30-day fix. a slow, honest homecoming. she showed up, she was honest, and she let it take the time it needed \ud83d\udda4 books are open, shoot me a dm.",
+  "trigger": [
+   "Results & Testimonials"
+  ],
+  "format": "Short Form Video",
+  "style": "Talking Head",
+  "division": "talking_head",
+  "posted": "2026-08-13",
+  "rank": 38,
+  "drank": 21
+ },
+ {
+  "handle": "erseaberg",
+  "title": "You don\u2019t need another course to ignore, you need something built for your actual business. Comment AUDIT and I\u2019ll walk",
+  "views": 80,
+  "comments": 0,
+  "likes": 4,
+  "outlier": 0.11,
+  "followers": 756,
+  "video_url": "https://www.instagram.com/p/Db4X-zosM4U/",
+  "audio_url": "https://instagram.fsvq2-1.fna.fbcdn.net/o1/v/t2/f2/m78/AQPMok4aRUTDZIPJk45LKlqVajdQvb6mt9yYv1r3Ga9sZV_nIwGKYxiUZS6tBSTO0pbe2yLG2tPb3AdCO4eRL410RxE67OEXaWq1kJ8.mp4?_nc_cat=111&_nc_oc=Adr5WNFfFM_ip7J8iVbGyxsARakiGbCTHyY0ML5qA2j_G4zOAilZ4So2LXl6X5niOQ4&_nc_sid=9ca052&_nc_ht=instagram.fsvq2-1.fna.fbcdn.net&_nc_ohc=wx9ZUUUqHpYQ7kNvwGUKby4&efg=eyJ2ZW5jb2RlX3RhZyI6ImlnLXhwdmRzLmNsaXBzLmMyLUMzLmRhc2hfbG5faGVhYWNfdmJyM19hdWRpbyIsInZpZGVvX2lkIjpudWxsLCJvaWxfdXJsZ2VuX2FwcF9pZCI6OTM2NjE5NzQzMzkyNDU5LCJjbGllbnRfbmFtZSI6ImlnIiwieHB2X2Fzc2V0X2lkIjoxNjAwMjk0Mzk0NzY5OTg0LCJhc3NldF9hZ2VfZGF5cyI6MywidmlfdXNlY2FzZV9pZCI6MTA4MjcsImR1cmF0aW9uX3MiOjc3LCJiaXRyYXRlIjo1MjM1MSwidXJsZ2VuX3NvdXJjZSI6Ind3dyJ9&ccb=17-1&_nc_gid=7nj1w-GzmEuNWkQ6Ll98Tg&_nc_zt=28&_nc_ss=7a22e&oh=00_AQFHDUcP37OojlhnYyl48NnK2W44kMkJfTDTJdlPju0wew&oe=6A8192C4",
+  "hook": "The real reason that course or template bundle you bought never actually stuck has",
+  "transcript": "The real reason that course or template bundle you bought never actually stuck has absolutely nothing to do with discipline.\nTrust me, I know you have a folder somewhere full of courses, templates, and a membership that you meant to finish.\nI have one too.\nAnd you bought them because you genuinely wanted to fix your backend, and then real life hit, and none of it got implemented.\nSo you have quietly filed that under the personal failure category.\nBut it's not.\nIt was never a discipline problem.\nGeneric education is built for general business, and you don't run a general business.\nYou run a very specific one with your own clients, your own team, and your own little weird nuanced issues, and a dripped out PDF was never going to be able to map that.\nAnd that's exactly why the advice never landed.\nYou were handed the right answer for someone else, and then asked to reverse engineer it into your own world at 11 o'clock at night on top of every single other thing that you've been carrying.\nWhat a six figure business like yours actually needs is not more material to consume.\nIt needs someone to sit inside the specifics with you and build the foundation around how your business actually works.\nSo if you're sitting there right now thinking you already tried all the things and it didn't work, you didn't fail the course.\nThe course was just never built for you in the first place.",
+  "caption": "You don\u2019t need another course to ignore, you need something built for your actual business. Comment AUDIT and I\u2019ll walk you through how the Snapshot Audit works.",
+  "trigger": [
+   "Overcome Objections"
+  ],
+  "format": "Short Form Video",
+  "style": "Talking Head",
+  "division": "talking_head",
+  "posted": "2026-08-11",
+  "rank": 39,
+  "drank": 22
+ },
+ {
+  "handle": "revivetherapyservices",
+  "title": "Healing will not cost you your drive, I promise. Comment \"[WORTHY]\" and I'll send you the first step, zero pressure!",
+  "views": 77,
+  "comments": 0,
+  "likes": 2,
+  "outlier": 0.05,
+  "followers": 1519,
+  "video_url": "https://www.instagram.com/p/Db3ZsAWCGFn/",
+  "audio_url": "https://scontent-cdg6-1.cdninstagram.com/o1/v/t2/f2/m78/AQMQD8hNHUsMnwjFPreTBZiVocODFO-HLskOl-kVxgV-C-nstRqnIojzIXLTmcBAnV9hKwC1pYKyOu2WHkZ8JPgjp6LLFlDXd6GJzVw.mp4?_nc_cat=106&_nc_sid=9ca052&_nc_ht=scontent-cdg6-1.cdninstagram.com&_nc_ohc=4OBpWYN2iK4Q7kNvwFYTWNB&efg=eyJ2ZW5jb2RlX3RhZyI6ImlnLXhwdmRzLmNsaXBzLmlnd3d3LUMzLmRhc2hfbG5faGVhYWNfdmJyM19hdWRpbyIsInZpZGVvX2lkIjpudWxsLCJvaWxfdXJsZ2VuX2FwcF9pZCI6OTM2NjE5NzQzMzkyNDU5LCJjbGllbnRfbmFtZSI6ImlnIiwieHB2X2Fzc2V0X2lkIjoxODA5NDU4NDczMTQ1NDY0OCwiYXNzZXRfYWdlX2RheXMiOjQsInZpX3VzZWNhc2VfaWQiOjEwMDk5LCJkdXJhdGlvbl9zIjoxMjMsImJpdHJhdGUiOjUzODYwLCJ1cmxnZW5fc291cmNlIjoid3d3In0%3D&ccb=17-1&_nc_gid=bhwexc-q8ud62hil1XZLBQ&_nc_ss=73689&_nc_zt=28&oh=00_AQHWBWfM9U5yWxO_3Nx7JLrjsBbbAgqmdRJqtAg0KJyj7Q&oe=6A8196A3",
+  "hook": "Your ambition and drive doesn't have to be a trauma response. Here's the thing,",
+  "transcript": "Your ambition and drive doesn't have to be a trauma response.\nHere's the thing, hustle culture taught you that your worth is something you have to earn.\nThat you're only as valuable as your biggest achievement.\nAnd that story sells endless courses and 5am routines of women who are quietly terrified of slowing the foot down.\nAnd the people profiting from it, they need you to believe that resting is the same thing as falling behind.\nSo what happens?\nYou never actually stop.\nWhen you were a wee young lass, your nervous system learned early that being impressive is what you needed to do to stay safe.\nTo stay loved, to stay accepted.\nSo achievement no longer becomes a free choice, it's a survival mechanism.\nAnd so you live in a state of hypervigilance.\nYour drive and your dread got wired together a long time ago.\nA big fear a lot of high functioning, high performing women have is that doing the work is going to strip away that drive.\nAnd leave them unmotivated and being lazy on the couch.\nAnd that's just not how it goes.\nBottom up work leaves your ambition and drive intact.\nThe good thing is though, it takes that panic out from underneath it.\nAnd what it leaves is someone who is more intentional, more energized by the work they're actually doing.\nBecause it's what they actually truly want and desire to do.\nNot because they have to do it to feel safe.\nHere's the thing, chasing your worth through achievement never actually brings you satisfaction.\nYou're just running towards a finish line that's not actually there.\nAnd you can hit every single goal, still lie there at 3am, still feeling like you're not enough.\nBecause nothing that's external is going to make you have that internal sense of safety that you're so longing for.\nYou see, you were never not worthy.\nYou were dysregulated and your body did what it knew how to do to keep your head above water.\nWhen you do the work, your system recalibrates.\nAnd your ambition is so fully yours.",
+  "caption": "Healing will not cost you your drive, I promise. Comment \"[WORTHY]\" and I'll send you the first step, zero pressure!",
+  "trigger": [
+   "Villains & Differentiation"
+  ],
+  "format": "Short Form Video",
+  "style": "Talking Head",
+  "division": "talking_head",
+  "posted": "2026-08-10",
+  "rank": 40,
+  "drank": 23
+ },
+ {
+  "handle": "jolihappynails",
+  "title": "If \"I'm an artist, not a business person\" has been your reason to avoid the money side, comment \"BUILDER\" and I'll DM yo",
+  "views": 76,
+  "comments": 0,
+  "likes": 12,
+  "outlier": 0.03,
+  "followers": 2872,
+  "video_url": "https://www.instagram.com/p/Db_0d_TpoXG/",
+  "audio_url": "https://www.instagram.com/reels/audio/29021623557427148/",
+  "hook": "",
+  "transcript": "You don't have to turn into some whole business person to build a nail business that finally pays you.\nI say that as someone who hid behind, I am an artist for years.\nThe objection under a lot of stalled businesses is quiet.\nI am an artist, not a business person.\nIt sounds like a personality fact.\nIt is actually a shield and I held it up for a long time.\nSo I know exactly what it protects you from.\nIt protects you from learning the one skill that would change your income.\nBecause if you are just an artist, then pricing, positioning, retention are somebody else's job and you are allowed to stay confused about them forever without being your fault.\nSo here is the freeing part.\nYou do not have to become a business person.\nThat is a false trait.\nYou can stay every bit the craftswoman you are and simply learn a handful of concrete moves.\nHow to define a dream result in the first 30 minutes.\nHow to rebook in the same chair.\nHow to set a price and hold it.\nNone of that requires a personality transplant.\nThe tech who out-earns you is usually not more of a business type than you.\nShe just refused to let the artist's identity excuse her from three or four learnable skills.\nShe kept the art and added the mechanics.\nAnd the mechanics are far simpler than the art you already master.\nSo drop the either or.\nYou can still know your numbers.\nIn fact, the best version of your art only reaches people when a little structure carries it there.\nLearn the few moves, keep the whole artist and watch the business finally hold up to the work you are already proud of.",
+  "caption": "If \"I'm an artist, not a business person\" has been your reason to avoid the money side, comment \"BUILDER\" and I'll DM you the free call that'll give you the few skills that actually move your income.",
+  "trigger": [
+   "Overcome Objections"
+  ],
+  "format": "Short Form Video",
+  "style": "Talking Head",
+  "division": "talking_head",
+  "posted": "2026-08-13",
+  "rank": 41,
+  "drank": 24
+ },
+ {
+  "handle": "erseaberg",
+  "title": "Waiting for the slow season to fix this is how you lose the slow season too. Comment SOUNDBOARD and let\u2019s build the foun",
+  "views": 73,
+  "comments": 0,
+  "likes": 1,
+  "outlier": 0.1,
+  "followers": 756,
+  "video_url": "https://www.instagram.com/p/Db30QtAAG8y/",
+  "audio_url": "https://scontent-syd2-1.cdninstagram.com/o1/v/t2/f2/m78/AQMmQd-wbkmV6igQiRGz_cHFqOqwxeTs2Mgl9KvuFmFHmHC31hJ_dmH4mTgPD7OogNLCwMa8UQ76W4jM-eSz9dVYako9Prd9FCPWkqY.mp4?_nc_cat=109&_nc_sid=9ca052&_nc_ht=scontent-syd2-1.cdninstagram.com&_nc_ohc=076pvAY1XhcQ7kNvwEFkl6O&efg=eyJ2ZW5jb2RlX3RhZyI6ImlnLXhwdmRzLmNsaXBzLmMyLUMzLmRhc2hfbG5faGVhYWNfdmJyM19hdWRpbyIsInZpZGVvX2lkIjpudWxsLCJvaWxfdXJsZ2VuX2FwcF9pZCI6OTM2NjE5NzQzMzkyNDU5LCJjbGllbnRfbmFtZSI6ImlnIiwieHB2X2Fzc2V0X2lkIjoxMzk1NDUxOTY5Mzk2NDIwLCJhc3NldF9hZ2VfZGF5cyI6NCwidmlfdXNlY2FzZV9pZCI6MTA4MjcsImR1cmF0aW9uX3MiOjcyLCJiaXRyYXRlIjo1MzM2NywidXJsZ2VuX3NvdXJjZSI6Ind3dyJ9&ccb=17-1&_nc_gid=U3fz2U2NzNDi0kS0CKCuTA&_nc_ss=7a22e&_nc_zt=28&oh=00_AQH48nlcfHvFjeG4FRiUKjNq6yNveGq7I_ze9LCFqop43w&oe=6A81A1F2",
+  "hook": "The cost of putting off your systems until the off-season is just so much",
+  "transcript": "The cost of putting off your systems until the off-season is just so much higher than the cost of building it right now, and I want to walk you through why.\nYou keep telling yourself that you just need to make it through the slow season, and then you'll finally fix all of it, and I get it because you're underwater right now, and slowing down feels impossible.\nBut here's the part that stings.\nThere is no off-season for the founder who's still the bottleneck, because the off-season is exactly when you feel it.\nThe work slows down, and you are still the one who knows how everything runs, so you're spending your entire break doing all the admin stuff instead of rusting.\nNow for the real math on waiting.\nEvery month that you spend without a foundation is another month that you're redoing your team's work, another month of turning down clients you can't deliver on, and another month of you being the ceiling that the whole business hits.\nI literally watched a founder sit on this for years because she was just so slammed, and she didn't have time to slow down.\nBut when we finally spent time getting all of the processes out of her head, her team stopped running to her every five seconds for every little thing, and then she got her evenings and her weekends back.\nThe reality is that waiting is not free.\nIt's just not a cost that you can see on an invoice.\nBuilding the foundation now is the cheaper decision every single time.",
+  "caption": "Waiting for the slow season to fix this is how you lose the slow season too. Comment SOUNDBOARD and let\u2019s build the foundation before the next busy stretch hits.",
+  "trigger": [
+   "Overcome Objections"
+  ],
+  "format": "Short Form Video",
+  "style": "Talking Head",
+  "division": "talking_head",
+  "posted": "2026-08-10",
+  "rank": 42,
+  "drank": 25
+ },
+ {
+  "handle": "erseaberg",
+  "title": "Hiring into a business with no systems just gives you a more expensive version of the same problem. Comment AUDIT and le",
+  "views": 73,
+  "comments": 0,
+  "likes": 1,
+  "outlier": 0.1,
+  "followers": 756,
+  "video_url": "https://www.instagram.com/p/Db_LbyyA1pj/",
+  "audio_url": "https://scontent-qro3-1.cdninstagram.com/o1/v/t2/f2/m78/AQPFZofyf6hGeQrut04dTtQO4kfOSC-BC39wQ9_2cp6_NJiRuNO2DNFCEKzsaPcRNEjbQeUICiJbOI9ZE_jXgZL-D52z51md2ajC_i4.mp4?_nc_cat=106&_nc_sid=9ca052&_nc_ht=scontent-qro3-1.cdninstagram.com&_nc_ohc=qpGj6EP1y9IQ7kNvwEIyC_m&efg=eyJ2ZW5jb2RlX3RhZyI6ImlnLXhwdmRzLmNsaXBzLmMyLUMzLmRhc2hfbG5faGVhYWNfdmJyM19hdWRpbyIsInZpZGVvX2lkIjpudWxsLCJvaWxfdXJsZ2VuX2FwcF9pZCI6OTM2NjE5NzQzMzkyNDU5LCJjbGllbnRfbmFtZSI6ImlnIiwieHB2X2Fzc2V0X2lkIjo5MDU2OTc0NDIxMzUyNTYsImFzc2V0X2FnZV9kYXlzIjoxLCJ2aV91c2VjYXNlX2lkIjoxMDgyNywiZHVyYXRpb25fcyI6NzcsImJpdHJhdGUiOjUyMjk5LCJ1cmxnZW5fc291cmNlIjoid3d3In0%3D&ccb=17-1&_nc_gid=IBcXk3DvWjU1h9N370xOjA&_nc_ss=7a22e&_nc_zt=28&oh=00_AQGR5xUxi0dW0WxHH0g4g0lg4XUIWYN-DK7zTPPsei3Lbg&oe=6A8192E3",
+  "hook": "The biggest lie in the online business world is that hiring a VA is",
+  "transcript": "The biggest lie in the online business world is that hiring a VA is the answer to your operations problems.\nLiterally the entire industry tells you the same exact thing when you get overwhelmed.\nJust hire a VA.\nJust get another set of hands and the strain is going to go away.\nIt sounds responsible, so that's exactly what you do.\nBut then every single task bounces right back to you with now a whole pile of questions attached to it.\nAnd now you're managing the person on top of actually doing the work and you're quietly wondering what you did wrong.\nBut you didn't do anything wrong.\nYou were sold the wrong fix.\nHiring is not the answer to an operations problem.\nIt's the answer to a documentation problem and most founders just don't have that documentation yet.\nYou can't hand somebody a process that only exists in your head.\nThe industry loves this advice though because hiring is easy to sell and building a foundation is not.\nMore hands is just a clean hopeful story and it keeps you buying help instead of building the one thing that will actually help make everything else work.\nSo please, I'm begging you to not hire another person into the confusion.\nBuild the foundation first and then once you get one full process out of your head, then you can hire somebody else and that will finally bring the relief that you're supposed to have from the beginning.",
+  "caption": "Hiring into a business with no systems just gives you a more expensive version of the same problem. Comment AUDIT and let\u2019s find what\u2019s actually missing.",
+  "trigger": [
+   "Villains & Differentiation"
+  ],
+  "format": "Short Form Video",
+  "style": "Talking Head",
+  "division": "talking_head",
+  "posted": "2026-08-13",
+  "rank": 43,
+  "drank": 26
+ },
+ {
+  "handle": "revivetherapyservices",
+  "title": "1. You reread the same text five times hunting for the threat hidden in the tone, deciding whether the period at the end",
+  "views": 72,
+  "comments": 0,
+  "likes": 2,
+  "outlier": 0.05,
+  "followers": 1519,
+  "video_url": "https://www.instagram.com/p/DbyP_bmCLx7/",
+  "audio_url": "https://scontent-mrs2-2.cdninstagram.com/o1/v/t2/f2/m78/AQOZc5iJFhusxQGuo-ajxw5Yu49Jdn2-c5jBsSYqL_RaP0To_ihBiASGXYAvF8m9zBD0oBnHqNIf9quuXSeKKByTp1HS4vzJT9S-ek0.mp4?_nc_cat=107&_nc_sid=9ca052&_nc_ht=scontent-mrs2-2.cdninstagram.com&_nc_ohc=l0xkPQGUGoYQ7kNvwHHdWas&efg=eyJ2ZW5jb2RlX3RhZyI6ImlnLXhwdmRzLmNsaXBzLmMyLUMzLmRhc2hfbG5faGVhYWNfdmJyM19hdWRpbyIsInZpZGVvX2lkIjpudWxsLCJvaWxfdXJsZ2VuX2FwcF9pZCI6OTM2NjE5NzQzMzkyNDU5LCJjbGllbnRfbmFtZSI6ImlnIiwieHB2X2Fzc2V0X2lkIjoxODA5NDM2NTYwNTQ1NDY0OCwiYXNzZXRfYWdlX2RheXMiOjYsInZpX3VzZWNhc2VfaWQiOjEwMDk5LCJkdXJhdGlvbl9zIjo5LCJiaXRyYXRlIjo2OTc2NywidXJsZ2VuX3NvdXJjZSI6Ind3dyJ9&ccb=17-1&_nc_gid=oh_udTfRnwIOq0quhZ1OxA&_nc_zt=28&_nc_ss=7a22e&oh=00_AQElw_4V9FL5hibYINgAXJX8jQIiWMOCLxzMX4yU9eWCzg&oe=6A81A178",
+  "hook": "1. You reread the same text five times hunting for the threat hidden in the tone, deciding whether the period at the end means they are mad at you, when they were almost certainly just busy.",
+  "transcript": "",
+  "caption": "1. You reread the same text five times hunting for the threat hidden in the tone, deciding whether the period at the end means they are mad at you, when they were almost certainly just busy.\n \n2. You over prepare for everything, from a five minute phone call to a grocery run, because getting caught off guard feels less like an inconvenience and more like actual physical danger.\n \n3. You cannot relax on a day off, so you clean or check your phone or find one more task, because your body is still waiting for something bad to happen and sitting still feels unsafe.\n \n4 You wake up at the smallest sound and sleep with one ear open, because even in the middle of the night your body refuses to fully stand down.\n\nYour nervous system has been on shift for so long that you have forgotten what off duty even feels like! If two or more of these are you, it is a pattern your body learned and not a flaw in your wiring, and it can be recalibrated.\n\nComment \"[OFFDUTY]\" and I'll send you the free nervous system worksheet I put together for exactly this. No pressure!",
+  "trigger": [
+   "Connect with Symptoms"
+  ],
+  "format": "Short Form Video",
+  "style": "B - Roll + Text",
+  "division": "broll",
+  "posted": "2026-08-08",
+  "rank": 44,
+  "drank": 18
+ },
+ {
+  "handle": "erseaberg",
+  "title": "Ninety days of boring, foundational work buys back your whole calendar. Comment AUDIT and I\u2019ll show you where your roadm",
+  "views": 71,
+  "comments": 0,
+  "likes": 4,
+  "outlier": 0.09,
+  "followers": 756,
+  "video_url": "https://www.instagram.com/p/Db36HyBAPy-/",
+  "audio_url": "https://instagram.fxap5-1.fna.fbcdn.net/o1/v/t2/f2/m78/AQOn7I3M6mcA7mwPfdNJa3obPpyUVw1bmZgg_hFCEUoKHpaaFgV8Erpeg2X-hj_YhW4M0i9Spa6Y6EZC7pD2IiMlnpsU52UPqWrhDW0.mp4?_nc_cat=103&_nc_oc=Adr8WA9ESSVWVXSaLov3e-mBUewQt7HD1Hfa0kIjwo6HZYgn2QsKCzA6lBU4d6eCbxU&_nc_sid=9ca052&_nc_ht=instagram.fxap5-1.fna.fbcdn.net&_nc_ohc=fxcZiHwJpQ0Q7kNvwFyhZdM&efg=eyJ2ZW5jb2RlX3RhZyI6ImlnLXhwdmRzLmNsaXBzLmMyLUMzLmRhc2hfbG5faGVhYWNfdmJyM19hdWRpbyIsInZpZGVvX2lkIjpudWxsLCJvaWxfdXJsZ2VuX2FwcF9pZCI6OTM2NjE5NzQzMzkyNDU5LCJjbGllbnRfbmFtZSI6ImlnIiwieHB2X2Fzc2V0X2lkIjoxNDQwNjA3MTk0NTQ0OTg0LCJhc3NldF9hZ2VfZGF5cyI6NCwidmlfdXNlY2FzZV9pZCI6MTA4MjcsImR1cmF0aW9uX3MiOjczLCJiaXRyYXRlIjo1MjA2NiwidXJsZ2VuX3NvdXJjZSI6Ind3dyJ9&ccb=17-1&_nc_gid=DtPhFLe7m6JLobUimz0Vig&_nc_zt=28&_nc_ss=7a22e&oh=00_AQHHGoiMPSiTlMRQCac6egnDuWPFrrlJECaZOZ-14E8fMA&oe=6A8180E4",
+  "hook": "Here's the roadmap from answering 40 team questions a week to answering basically zero",
+  "transcript": "Here's the roadmap from answering 40 team questions a week to answering basically zero in about 90 days.\nMonth one is not about tech.\nIt's about clarity.\nWe get the business out of your head and written down all about one full client journey and how it runs from start to finish so there's finally one single source of truth and it's not you.\nMonth two, we focus on training.\nYour team learns to run off the documentation instead of running to you.\nAnd yes, they're still gonna ask some questions but now you get to the point where you can tell them where they can go find the answer instead of re-explaining it for the millionth time.\nAnd then by month three, all of those questions that used to hit you all day long are getting answered without you because the answer lives in a system now instead of just in your memory.\nNow I want you to picture what that actually buys you.\nMaybe it's a Tuesday afternoon that's genuinely yours or a full weekend where your phone is completely quiet.\nMaybe it's an owner's draw that shows up predictably because the business isn't stalling every time you step away from it.\nThis is literally the entire point of foundation.\nNot a bigger, busier version of the trap that you're in now but a business that's running while you get to actually live your life.",
+  "caption": "Ninety days of boring, foundational work buys back your whole calendar. Comment AUDIT and I\u2019ll show you where your roadmap starts.",
+  "trigger": [
+   "Narrate Desired Outcomes"
+  ],
+  "format": "Short Form Video",
+  "style": "Talking Head",
+  "division": "talking_head",
+  "posted": "2026-08-10",
+  "rank": 45,
+  "drank": 27
+ },
+ {
+  "handle": "erseaberg",
+  "title": "The restful off-season is built during the busy one. Comment APPLY and let\u2019s make sure this one is different.",
+  "views": 68,
+  "comments": 0,
+  "likes": 3,
+  "outlier": 0.09,
+  "followers": 756,
+  "video_url": "https://www.instagram.com/p/Dbys1AVgOyQ/",
+  "audio_url": "https://instagram.fsyd8-1.fna.fbcdn.net/o1/v/t2/f2/m78/AQM1TDUgJRmA2AtV3vEO9Y5l1oe6VUy8rXsR34rxeJ65ceI8FidgZPCgf6lbhYFmsXtr-40LQvoqyEY_10wd12rNG2eUV8_dvh8E8jk.mp4?_nc_cat=108&_nc_oc=AdpIe-MxPawYfbxURjpAMT2KDIN7GXY3MugfTGLAwZvslzWCUT88f4SE0-voxBAYC6pfE7BHcyOVYpFw9sAL-Avc&_nc_sid=9ca052&_nc_ht=instagram.fsyd8-1.fna.fbcdn.net&_nc_ohc=mJ2up0vaXEYQ7kNvwHrjDTc&efg=eyJ2ZW5jb2RlX3RhZyI6ImlnLXhwdmRzLmNsaXBzLmMyLUMzLmRhc2hfbG5faGVhYWNfdmJyM19hdWRpbyIsInZpZGVvX2lkIjpudWxsLCJvaWxfdXJsZ2VuX2FwcF9pZCI6OTM2NjE5NzQzMzkyNDU5LCJjbGllbnRfbmFtZSI6ImlnIiwieHB2X2Fzc2V0X2lkIjoxNTE5MTY0ODgzNTU2NDQ0LCJhc3NldF9hZ2VfZGF5cyI6NiwidmlfdXNlY2FzZV9pZCI6MTA4MjcsImR1cmF0aW9uX3MiOjY4LCJiaXRyYXRlIjo1MzQ5NSwidXJsZ2VuX3NvdXJjZSI6Ind3dyJ9&ccb=17-1&_nc_gid=sjWkQdUxpwcDJ9S7wc1iZQ&_nc_ss=7a22e&_nc_map=urlgen_bucketless&_nc_zt=28&oh=00_AQHqvkankdfrAcMDGaIQ3h9UgkhMDF6ej5_WhjW45GsZVw&oe=6A817D2D",
+  "hook": "Here's how your next off season is gonna look once the business can run",
+  "transcript": "Here's how your next off season is gonna look once the business can run without you being in the room.\nI want you to take a second to picture this low season that you've been dreaming about.\nNot the version where you're finally catching up on admin, the version where you finally genuinely rest because the work that has to keep happening is happening in the background without you needing to steer it.\nYour team is beautifully running the client experience off your documented processes.\nSo every onboarding, check-in, and every handoff is all moving on its own while you're completely off grid.\nAnd of course, this means the money's still coming in on a predictable rhythm because the business is no longer tied to your energy.\nIt's tied to the systems that you created.\nAnd it sounds cliche, but systems don't need a vacation.\nSo by the time season comes back around, you get to come in with a clear head and the actual capacity to plan the next stretch instead of digging out of the last one.\nThat's what an off season's supposed to feel like.\nBut none of this happens if you're wishing for a mid-season.\nIt happens because you built the foundation during those busy months so that future you actually gets to clock out and rest.",
+  "caption": "The restful off-season is built during the busy one. Comment APPLY and let\u2019s make sure this one is different.",
+  "trigger": [
+   "Narrate Desired Outcomes"
+  ],
+  "format": "Short Form Video",
+  "style": "Talking Head",
+  "division": "talking_head",
+  "posted": "2026-08-08",
+  "rank": 46,
+  "drank": 28
+ },
+ {
+  "handle": "erseaberg",
+  "title": "The pricey fix usually starts with a free habit: write down how your business already runs. Comment AUDIT and I\u2019ll show",
+  "views": 51,
+  "comments": 0,
+  "likes": 1,
+  "outlier": 0.07,
+  "followers": 756,
+  "video_url": "https://www.instagram.com/p/Dbzbn4QM1CI/",
+  "audio_url": "https://scontent-gmp1-1.cdninstagram.com/o1/v/t2/f2/m78/AQNyWZokbXeRhjUNv58KgHpae1MyZKPR-4X9iwtQ8bDR7co1g_7T4f4_MYtYB712F72Q3-7VjaoEgHU1VH_kDKr6c1OKAhFNSqZk0u0.mp4?_nc_cat=105&_nc_sid=9ca052&_nc_ht=scontent-gmp1-1.cdninstagram.com&_nc_ohc=9yEAKF8Fx8MQ7kNvwF2RMIx&efg=eyJ2ZW5jb2RlX3RhZyI6ImlnLXhwdmRzLmNsaXBzLmlnd3d3LUMzLmRhc2hfbG5faGVhYWNfdmJyM19hdWRpbyIsInZpZGVvX2lkIjpudWxsLCJvaWxfdXJsZ2VuX2FwcF9pZCI6OTM2NjE5NzQzMzkyNDU5LCJjbGllbnRfbmFtZSI6ImlnIiwieHB2X2Fzc2V0X2lkIjoyODc0MTAwMDg2MzAyODU5LCJhc3NldF9hZ2VfZGF5cyI6NSwidmlfdXNlY2FzZV9pZCI6MTA4MjcsImR1cmF0aW9uX3MiOjgxLCJiaXRyYXRlIjo1MzU3MywidXJsZ2VuX3NvdXJjZSI6Ind3dyJ9&ccb=17-1&_nc_gid=d4_YCLsbjSvIO3_tXQmYpw&_nc_ss=7c689&_nc_zt=28&oh=00_AQEgcD9Um7R1ke0ZS7VwaSixeYIygKTsNeDD7hKk75UjKA&oe=6A8195F6",
+  "hook": "Operations consultants literally get paid five figures to build the exact thing I'm going",
+  "transcript": "Operations consultants literally get paid five figures to build the exact thing I'm going to break down for you in like the next 60 seconds.\nPeople pay a lot of money to have someone come in and untangle their operations and most of the time the first very first thing that that expensive person does is embarrassingly simple.\nThey literally just document exactly how the business already runs.\nThat's it.\nThat's the whole secret nobody wants to admit.\nBefore any fancy builds, you map one client journey, every single step, every handoff, every decision, and you write it down somewhere that your team can actually find it.\nI've literally done this in a solar company, a church, a landscape lighting company, a wedding planning company, and the pattern is always the same.\nIt never changes.\nThe magic is not in a tool or a specific system.\nIt's getting the knowledge out of the one person's head and then into a system.\nThe reason that it works so well is that a documented process removes you as the single point of failure.\nSo your team stops guessing, the same mistakes stop repeating, and the business finally has a spine that's not you and your memory.\nSo you don't have to pay five figures to start this.\nYou literally need one afternoon and one process written down and that is the same first move that the most expensive person is going to have you start with on day one.",
+  "caption": "The pricey fix usually starts with a free habit: write down how your business already runs. Comment AUDIT and I\u2019ll show you where to start.",
+  "trigger": [
+   "Elevate Authority"
+  ],
+  "format": "Short Form Video",
+  "style": "Talking Head",
+  "division": "talking_head",
+  "posted": "2026-08-09",
+  "rank": 47,
+  "drank": 29
+ },
+ {
+  "handle": "kdmueller",
+  "title": "it wasn\u2019t responsiveness. it was proof. proof you\u2019re still on top of it, still the one who never drops the ball. i did f",
+  "views": 46,
+  "comments": 0,
+  "likes": 0,
+  "outlier": 0.04,
+  "followers": 1193,
+  "video_url": "https://www.instagram.com/p/DcAMxRNBbgW/",
+  "audio_url": "https://www.instagram.com/reels/audio/270317763528152/",
+  "hook": "",
+  "transcript": "",
+  "caption": "it wasn\u2019t responsiveness. it was proof. proof you\u2019re still on top of it, still the one who never drops the ball. i did fifteen years of that. the late replies aren\u2019t dedication, they\u2019re a receipt you keep writing so no one questions your worth. you\u2019re not behind, girl. you\u2019re carrying a belief that being needed is the same as being valuable, and it\u2019s running your nights. put the phone down at 9. the world keeps turning. comment BACKBONE and i\u2019ll send you where to start.",
+  "trigger": [
+   "Connect with Symptoms"
+  ],
+  "format": "Short Form Video",
+  "style": "B - Roll + Text",
+  "division": "broll",
+  "posted": "2026-08-14",
+  "rank": 48,
+  "drank": 19
+ },
+ {
+  "handle": "erseaberg",
+  "title": "Every founder who finally stepped back had these three things first, and not one of them was a new app. Comment AUDIT an",
+  "views": 45,
+  "comments": 0,
+  "likes": 6,
+  "outlier": 0.06,
+  "followers": 756,
+  "video_url": "https://www.instagram.com/p/Db6gpmsA6ER/",
+  "audio_url": "https://instagram.fcju1-1.fna.fbcdn.net/o1/v/t2/f2/m78/AQOfdS9-miIoXhPV-leAfzGLNQZwqw9Y-VAh9GBBYvVKGFPiVHsJxBNg6ljn_fXZjszCrukFu-VcjtQA_UH3CZuvqr1n1uYOMS1eqM0.mp4?_nc_cat=103&_nc_oc=Adpwqq3bjADj-0aCcsqU9l4POnvJQ5YS9rM7ntWM_ILDYyV3wMzpCEdqbekvV8buu4c&_nc_sid=9ca052&_nc_ht=instagram.fcju1-1.fna.fbcdn.net&_nc_ohc=LEOX7S5hBocQ7kNvwFeBaEr&efg=eyJ2ZW5jb2RlX3RhZyI6ImlnLXhwdmRzLmNsaXBzLmMyLUMzLmRhc2hfbG5faGVhYWNfdmJyM19hdWRpbyIsInZpZGVvX2lkIjpudWxsLCJvaWxfdXJsZ2VuX2FwcF9pZCI6OTM2NjE5NzQzMzkyNDU5LCJjbGllbnRfbmFtZSI6ImlnIiwieHB2X2Fzc2V0X2lkIjo5ODYwODY3NTQ0NjMyNzcsImFzc2V0X2FnZV9kYXlzIjozLCJ2aV91c2VjYXNlX2lkIjoxMDgyNywiZHVyYXRpb25fcyI6NTAsImJpdHJhdGUiOjUyODM4LCJ1cmxnZW5fc291cmNlIjoid3d3In0%3D&ccb=17-1&_nc_gid=K-qQSjHb7M3sr8i8_szHVg&_nc_zt=28&_nc_ss=7a22e&oh=00_AQGJgp2MIMgYYucWuEp7qbB9mEJx_aB4ecgox0F4ANv74Q&oe=6A81858C",
+  "hook": "There's three things every single business I have rebuilt needed before the founder could",
+  "transcript": "There's three things every single business I have rebuilt needed before the founder could actually step back from it.\nNumber one is a documented client journey.\nEvery business that freed its founder had one full process written down from start to finish so the team could run the client experience without asking the owner what happens next.\nTwo is clear ownership.\nIn every rebuild, somebody other than the founder had to own each part of the process by name because the task with no owner is always going to quietly become the founder's task again.\nNumber three is pricing that matches capacity.\nThe business that could breathe had prices tied to what the team could actually deliver on so the growth added money instead of just adding chaos and overwhelm.\nThe surprising part was what was actually not on the list.\nSo it wasn't a fancy platform, it wasn't even a bigger team, and not even a rebrand.\nThe founders who stepped back did it on the foundation, not on more stuff.",
+  "caption": "Every founder who finally stepped back had these three things first, and not one of them was a new app. Comment AUDIT and let\u2019s see which one you\u2019re missing.",
+  "trigger": [
+   "Results & Testimonials"
+  ],
+  "format": "Short Form Video",
+  "style": "Talking Head",
+  "division": "talking_head",
+  "posted": "2026-08-11",
+  "rank": 49,
+  "drank": 30
+ },
+ {
+  "handle": "kdmueller",
+  "title": "being needed is not the same as being valuable.",
+  "views": 42,
+  "comments": 0,
+  "likes": 2,
+  "outlier": 0.04,
+  "followers": 1193,
+  "video_url": "https://www.instagram.com/reel/Db9ayS3h9dN/?igsh=MXc2dHhzYXBmb3BnbQ==&igsi=MXc2dHhzYXBmb3BnbQ==",
+  "audio_url": "https://www.instagram.com/reels/audio/901614160623935/",
+  "hook": "",
+  "transcript": "Of the sky, I close my eyes",
+  "caption": "being needed is not the same as being valuable.\npicture walking into the room and mattering before you\u2019ve fixed anyone or picked up the slack. no one claps for how tired you are. they just want you there. you don\u2019t have to earn your seat every single day. you already have it. put something down and stay anyway.\ncomment BACKBONE for where the shift starts.",
+  "trigger": [],
+  "format": "Short Form Video",
+  "style": "B - Roll + Text",
+  "division": "broll",
+  "posted": "2026-08-13",
+  "rank": 50,
+  "drank": 20
+ },
+ {
+  "handle": "reland_brandstrategist",
+  "title": "If you already know exactly where your brand is stuck and you keep scheduling around it, comment AUDIT and I will DM you",
+  "views": 33,
+  "comments": 0,
+  "likes": 1,
+  "outlier": 0.09,
+  "followers": 349,
+  "video_url": "https://www.instagram.com/p/Db_th4xBeId/",
+  "audio_url": "https://www.instagram.com/reels/audio/28031700393093443/",
+  "hook": "",
+  "transcript": "You keep telling me you need more calls or another offer and neither one of those is what's actually broken.\nYou can feel the bottleneck in your business and almost never name it correctly.\nWhat comes out of your mouth is a symptom.\nI need more calls.\nI need another offer.\nI need new colors or the honest one.\nI'm buried in clients and tasks that I could not take on another one and I'm still not making enough money.\nLet's be real, you've been circling the same thing for months making excuses and calling it timing.\nYou're too busy, the quarters wrong or you get it to it after this launch and I used to use every single one of those myself.\nThe reason it's staying on the list and not touching it is it means admitting you built something in the wrong order and nobody wants to look straight at a decision and say it's about them.\nHonestly, your ego just can't take the hit and so when we feel like this it's really hard to make a change that is going to put you in a position to win.\nBuilding in the wrong order is a sequence problem.\nIt has nothing to do with you or how you did something and a sequence problem has a fix.\nWe want to go offer first, messaging second and visuals last.\nIt sounds crazy coming from a brand expert but visuals last.\nThat is the order of authority and it is what turns your bottleneck from a mood into a task you can actually get done this week and start to reap the benefits moving forward.",
+  "caption": "If you already know exactly where your brand is stuck and you keep scheduling around it, comment AUDIT and I will DM you the first question I ask to break it open.",
+  "trigger": [
+   "Speak to Gaps and Mistakes"
+  ],
+  "format": "Short Form Video",
+  "style": "Talking Head",
+  "division": "talking_head",
+  "posted": "2026-08-13",
+  "rank": 51,
+  "drank": 31
+ },
+ {
+  "handle": "reland_brandstrategist",
+  "title": "You give away the first call because you are afraid a fee will cost you the client. Add up the free ones. The hours, the",
+  "views": 28,
+  "comments": 0,
+  "likes": 3,
+  "outlier": 0.08,
+  "followers": 349,
+  "video_url": "https://www.instagram.com/p/Db-6M1SAeL2/",
+  "audio_url": "https://www.instagram.com/reels/audio/27800259366264001/",
+  "hook": "",
+  "transcript": "",
+  "caption": "You give away the first call because you are afraid a fee will cost you the client. Add up the free ones. The hours, the custom proposals, the strategy you handed over so someone could take it and try it alone. Free trains buyers to treat your time as optional and to shop around while they do it. A paid entry point does the opposite. Even a small fee changes how someone shows up, because people value what they invest in and tune out what they get for nothing. Getting paid from the first conversation is not aggressive, it is the thing that finally protects your time and filters for people who are serious. If you are done running unpaid discovery calls, comment PROFIT and I will DM you how the paid entry works.",
+  "trigger": [
+   "Overcome Objections"
+  ],
+  "format": "Short Form Video",
+  "style": "B - Roll + Text",
+  "division": "broll",
+  "posted": "2026-08-13",
+  "rank": 52,
+  "drank": 21
+ },
+ {
+  "handle": "erseaberg",
+  "title": "Not you finding out which founder you are from a caption, but here we go.",
+  "views": 17,
+  "comments": 0,
+  "likes": 2,
+  "outlier": 0.02,
+  "followers": 756,
+  "video_url": "https://www.instagram.com/p/Db5v19OAaVq/",
+  "audio_url": "https://scontent-lhr6-2.cdninstagram.com/o1/v/t2/f2/m78/AQNgDf4VNE8YRwc8VJ7BB0iNkVoFBEBq5jOHs2ucb5l64G6XPXUI-qaOafC13oDY_XikVVLRwto9ymcrB8fsYQOsajKl09JkfPbJNlc.mp4?_nc_cat=109&_nc_sid=9ca052&_nc_ht=scontent-lhr6-2.cdninstagram.com&_nc_ohc=zcPfsemKPeoQ7kNvwFy0u7Y&efg=eyJ2ZW5jb2RlX3RhZyI6ImlnLXhwdmRzLmNsaXBzLmMyLUMzLmRhc2hfbG5faGVhYWNfdmJyM19hdWRpbyIsInZpZGVvX2lkIjpudWxsLCJvaWxfdXJsZ2VuX2FwcF9pZCI6OTM2NjE5NzQzMzkyNDU5LCJjbGllbnRfbmFtZSI6ImlnIiwieHB2X2Fzc2V0X2lkIjoxMDcwMTYyNzg4ODIwNjIxLCJhc3NldF9hZ2VfZGF5cyI6MywidmlfdXNlY2FzZV9pZCI6MTA4MjcsImR1cmF0aW9uX3MiOjQsImJpdHJhdGUiOjg1MTU1LCJ1cmxnZW5fc291cmNlIjoid3d3In0%3D&ccb=17-1&_nc_gid=e5bZUdENDb4xpP3AL65bVA&_nc_ss=7a22e&_nc_zt=28&oh=00_AQHoDNjzxjukRz8ttJUAqDaLTJ0MH-77EOvNtkktIo27bw&oe=6A81A4CA",
+  "hook": "Not you finding out which founder you are from a caption, but here we go.",
+  "transcript": "",
+  "caption": "Not you finding out which founder you are from a caption, but here we go.\n\nThe first type wears the busyness like a badge. They are proud of the packed calendar, the late nights, the \u201cI do it all\u201d energy, and they genuinely believe the hustle is the reason it works. It is not, the business just cannot function without them, and they call that dedication.\n\nThe second type got quiet about it and built a foundation. They wrote things down, they handed real ownership to their team, and they made themselves unnecessary on purpose, so the business runs whether they are on the clock or on a boat.\n\nSame talent, same hours in the day, completely different life. One of them is trapped inside the thing they built, the other one owns it.\n\nYou already know which one you want to be, babe. Comment APPLY and let\u2019s get you there.",
+  "trigger": [
+   "Tap into Identity"
+  ],
+  "format": "Short Form Video",
+  "style": "B - Roll + Text",
+  "division": "broll",
+  "posted": "2026-08-11",
+  "rank": 53,
+  "drank": 22
+ },
+ {
+  "handle": "jananiksa",
+  "title": "You do not need a bigger audience. You need to activate the buyers already in the one you have. Comment CLIENTS for how",
+  "views": 17,
+  "comments": 0,
+  "likes": 3,
+  "outlier": 0.01,
+  "followers": 2034,
+  "video_url": "https://www.instagram.com/p/Db_QsSWBrm1/",
+  "audio_url": "https://scontent-ssn1-1.cdninstagram.com/o1/v/t2/f2/m78/AQNYihUAG61Xndh6rt8QzHrk1oA4r4urH_50N2SuH2Q9DbKOoug7CJcb4sQTKappDr8kf5phj5LQCRP2qkJQmMmCRujp4e4eYGrelKM.mp4?_nc_cat=100&_nc_sid=9ca052&_nc_ht=scontent-ssn1-1.cdninstagram.com&_nc_ohc=Tber5OUu2EAQ7kNvwExkqw0&efg=eyJ2ZW5jb2RlX3RhZyI6ImlnLXhwdmRzLmNsaXBzLmMyLUMzLmRhc2hfbG5faGVhYWNfdmJyM19hdWRpbyIsInZpZGVvX2lkIjpudWxsLCJvaWxfdXJsZ2VuX2FwcF9pZCI6OTM2NjE5NzQzMzkyNDU5LCJjbGllbnRfbmFtZSI6ImlnIiwieHB2X2Fzc2V0X2lkIjoyMjMxMDY5NTc0NDA1ODk0LCJhc3NldF9hZ2VfZGF5cyI6MSwidmlfdXNlY2FzZV9pZCI6MTAwOTksImR1cmF0aW9uX3MiOjEyMSwiYml0cmF0ZSI6NTQ5ODMsInVybGdlbl9zb3VyY2UiOiJ3d3cifQ%3D%3D&ccb=17-1&_nc_gid=6kV3xJwgDxl9LWiA_2fGZg&_nc_zt=28&_nc_ss=7a22e&oh=00_AQGSIOSWRpxbyoAeH2sBhF3-811KLPnFM5lbHEfDZhfpog&oe=6A819071",
+  "hook": "They told you and sold you that you need more leads, but you never",
+  "transcript": "They told you and sold you that you need more leads, but you never really had a leads problem.\nLet me explain.\nYou were told the answer was more.\nThe industry tells you, you need to make more content, you need more followers, you need more likes, you need more leads, and that's actually not the truth.\nNot yet, anyway.\nThe problem doesn't become new leads until you convert the leads you have.\nIn other words, more leads is not going to fix a broken sales process, and it isn't your audience.\nI want you to think of it like this.\nImagine you have a water slide.\nIt's got the top of the hill, the bottom of the hill, and this is your sales process, right?\nWhat most people are telling you to do is just get more people to the top of the hill going down the slide.\nHowever, imagine if that water slide isn't completely built.\nImagine that there are gaps in the water slide where people fall through.\nImagine that instead of leading people from the top to the bottom, that they drop off at various points along the way because your sales process is broken.\nSo no matter how many people you start at the top of that hill with that water slide, they are not making it down into the pool of water or becoming a client.\nSo can you see how this logic is backwards?\nAnd instead, we have to fix the water slide first.\nThen we can bring more people to the top of the hill to ride down it.\nSo fix your broken sales process first, then we can talk about all the other ways to generate leads.\nAnd the kicker is while you fix this process, you're gonna learn so much about your client that's gonna make lead generation so much easier.\nSo stop doing it backwards like the industry tells you to do.\nI don't know why they do it this way, but I'm here to tell you and shout from the rooftops that it is what is keeping people from making more money right now.\nSo instead of looking for more leads, more leads, I need premium buyers, learn to activate the ones that are in your audience right now.\nIf you wann",
+  "caption": "You do not need a bigger audience. You need to activate the buyers already in the one you have. Comment CLIENTS for how I find them.\n\n#microaudiencetomillions #communicationcreateswealth #highticketcoach",
+  "trigger": [
+   "Villains & Differentiation"
+  ],
+  "format": "Short Form Video",
+  "style": "Talking Head",
+  "division": "talking_head",
+  "posted": "2026-08-13",
+  "rank": 54,
+  "drank": 32
+ }
+];
+const SNAPSHOT_DATE = "Aug 14, 2026";
+const SNAP = new Date(2026,7,14); // Aug 14 2026 (reference "today" = latest post)
+
+const DIVISIONS = [
+  {id:"all",          label:"All Divisions", emoji:"🏆"},
+  {id:"broll",        label:"B-Roll",        emoji:"🎬"},
+  {id:"talking_head", label:"Talking Head",  emoji:"🎙️"},
+  {id:"green_screen", label:"Green Screen",  emoji:"🟩"},
+  {id:"reaction",     label:"Reaction",      emoji:"💬"},
+  {id:"carousel",     label:"Carousel",      emoji:"🖼️"},
+];
+const DIV_LABEL = Object.fromEntries(DIVISIONS.map(d=>[d.id,d.label]));
+
+const $ = s => document.querySelector(s);
+const nf = n => (n==null?"—":n.toLocaleString("en-US"));
+const compact = n => { if(n==null) return "—"; if(n>=1e6) return (n/1e6).toFixed(n>=1e7?0:1)+"M"; if(n>=1e3) return (n/1e3).toFixed(n>=1e4?0:1)+"K"; return String(n); };
+const esc = s => (s||"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const fmtOutlier = o => o>=100? Math.round(o).toLocaleString() : o>=10? o.toFixed(1) : o.toFixed(2);
+const fmtDate = d => { const [y,m,day]=d.split("-"); return new Date(y,m-1,day).toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"}); };
+const daysAgo = d => { const [y,m,day]=d.split("-").map(Number); return (SNAP-new Date(y,m-1,day))/86400000; };
+
+let state = { view:"videos", sort:"views", q:"", division:"all", days:30 };
+const maxViewsAll = Math.max(...DATA.map(d=>d.views));
+
+const inWindow = d => daysAgo(d.posted) <= state.days + 0.5;
+const inDivision = d => state.division==="all" || d.division===state.division;
+function currentPool(){ return DATA.filter(d=>inWindow(d)&&inDivision(d)); }
+function rankPool(pool){ pool.slice().sort((a,b)=>b.views-a.views).forEach((d,i)=>d._rank=i+1); }
+
+/* ---------- header ---------- */
+function windowLabel(){ return state.days===365?"last 365 days":`last ${state.days} days`; }
+function renderHeaderStatic(){
+  const champ = DATA.slice().sort((a,b)=>b.views-a.views)[0];
+  $("#sub").innerHTML = `Head-to-head standings for every client video — overall and by content division. Filter the window, pick a division, and climb. <b>Take the crown.</b>`;
+  $("#snapshot").textContent = "Snapshot: "+SNAPSHOT_DATE;
+}
+function renderStats(pool){
+  const creators = new Set(pool.map(d=>d.handle)).size;
+  const totalViews = pool.reduce((a,d)=>a+d.views,0);
+  const champ = pool.slice().sort((a,b)=>b.views-a.views)[0];
+  const stats = [
+    {k:"Videos in play", v:pool.length},
+    {k:"Creators competing", v:creators},
+    {k:"Combined views", v:compact(totalViews)},
+    {k:(state.division==="all"?"Top score":DIV_LABEL[state.division]+" #1"), v:champ?compact(champ.views):"—", s:champ?"@"+champ.handle:""},
+  ];
+  $("#stats").innerHTML = stats.map(s=>`<div class="stat"><div class="k">${s.k}</div><div class="v tnum">${s.v}${s.s?` <small>${esc(s.s)}</small>`:""}</div></div>`).join("");
+  const dates = pool.map(d=>d.posted).sort();
+  $("#period").textContent = dates.length? (fmtDate(dates[0])+" – "+fmtDate(dates[dates.length-1])) : windowLabel();
+}
+
+/* ---------- division bar ---------- */
+function renderDivbar(){
+  const winPool = DATA.filter(inWindow);
+  const counts = {};
+  winPool.forEach(d=>counts[d.division]=(counts[d.division]||0)+1);
+  const extra = [...new Set(winPool.map(d=>d.division))].filter(id=>!DIV_LABEL[id]); // e.g. "other"
+  const divs = extra.length? DIVISIONS.concat(extra.map(id=>({id,label:id[0].toUpperCase()+id.slice(1),emoji:"🎞️"}))) : DIVISIONS;
+  $("#divbar").innerHTML = divs.map(dv=>{
+    const c = dv.id==="all"? winPool.length : (counts[dv.id]||0);
+    const sel = state.division===dv.id;
+    return `<button class="divpill" role="tab" aria-selected="${sel}" data-div="${dv.id}"><span class="emo">${dv.emoji}</span>${esc(dv.label)}<span class="cnt tnum">${c}</span></button>`;
+  }).join("");
+  document.querySelectorAll(".divpill").forEach(p=>p.addEventListener("click",()=>{ state.division=p.dataset.div; renderAll(); }));
+}
+
+/* ---------- podium ---------- */
+function renderPodium(pool){
+  $("#podScope").textContent = (state.division==="all"?"Overall":DIV_LABEL[state.division])+" · "+windowLabel();
+  const top = pool.slice().sort((a,b)=>b.views-a.views).slice(0,3);
+  if(!top.length){
+    $("#podium").innerHTML = `<div class="empty-state"><div class="big">👑</div><h3>No entries in this division yet</h3><p>First creator to post ${state.division==="all"?"":`a ${DIV_LABEL[state.division]} video `}in the ${windowLabel()} claims the crown.</p></div>`;
+    return;
+  }
+  $("#podium").innerHTML = `<div class="podium">`+top.map((d,i)=>{
+    const rankword=["Champion","Runner-up","Third place"][i];
+    return `<div class="pod g${i+1}">
+      ${i===0?'<div class="crown">👑</div>':''}
+      <div class="who"><div class="medal m${i+1}">${i+1}</div>
+        <div><div class="rankword">${rankword}</div><div class="handle">@${esc(d.handle)}</div></div></div>
+      <div class="bigviews tnum">${nf(d.views)}<span>views</span></div>
+      ${state.division==="all"?`<div class="divtag">${esc(DIV_LABEL[d.division]||d.division)}</div>`:''}
+      <div class="podtitle">${esc(d.title)||"—"}</div>
+      <div class="podmeta">
+        <div class="pm"><b class="tnum">${fmtOutlier(d.outlier)}×</b><i>Outlier</i></div>
+        <div class="pm"><b class="tnum">${nf(d.comments)}</b><i>Comments</i></div>
+        <div class="pm"><b class="tnum">${nf(d.likes)}</b><i>Likes</i></div>
+      </div></div>`;
+  }).join("")+`</div>`;
+}
+
+/* ---------- videos board ---------- */
+function triggerTags(t){ if(!t||!t.length) return ""; return `<div class="triggers">${t.map(x=>`<span class="trg">${esc(x)}</span>`).join("")}</div>`; }
+function renderBoard(pool){
+  const board=$("#board");
+  if(!pool.length){ board.innerHTML=`<div class="empty-state"><div class="big">🏁</div><h3>Division open</h3><p>No videos here yet in the ${windowLabel()}. Be the first on the board.</p></div>`; return; }
+  const q=state.q.trim().toLowerCase();
+  let rows=pool.filter(d=> !q || d.handle.toLowerCase().includes(q) || (d.hook||"").toLowerCase().includes(q) || (d.title||"").toLowerCase().includes(q));
+  rows.sort((a,b)=>(b[state.sort]||0)-(a[state.sort]||0));
+  if(!rows.length){ board.innerHTML=`<div class="empty-state"><div class="big">🔍</div><h3>No matches</h3><p>Nothing matches “${esc(state.q)}” in this view.</p></div>`; return; }
+  const maxV = Math.max(...pool.map(d=>d.views));
+  board.innerHTML = rows.map(d=>{
+    const isLead = d._rank===1;
+    const barW = Math.max(2, Math.sqrt(d.views/maxV)*100);
+    const hot = d.outlier>=3;
+    return `<div class="row${isLead?' lead':''}">
+      <div class="rowmain" role="button" tabindex="0" aria-expanded="false">
+        <div class="rank${d._rank<=3?' top3':''} tnum">${d._rank}</div>
+        <div class="vid">
+          <div class="h"><span class="handle">@${esc(d.handle)}</span>${d.style?`<span class="fmt">${esc(d.style)}</span>`:''}</div>
+          <div class="t">${esc(d.title)||esc(d.hook)||"Untitled"}</div>
+          <div class="barwrap"><div class="barfill" style="width:${barW}%"></div></div>
+        </div>
+        <div class="views-cell"><b class="tnum">${nf(d.views)}</b></div>
+        <div class="metric big"><span class="otag${hot?' hot':''} tnum">${fmtOutlier(d.outlier)}×</span><span class="lab">Outlier</span></div>
+        <div class="metric sm"><span class="tnum">${nf(d.comments)}</span><span class="lab">Comments</span></div>
+        <svg class="chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+      </div>
+      <div class="detail"><div class="detail-inner"><div class="dpad">
+        ${triggerTags(d.trigger)}
+        <div class="dgrid">
+          <div class="block"><div class="blab">🎣 The Hook</div><div class="hookbox"><p class="${d.hook?'':'empty'}">${d.hook?esc(d.hook):"No hook recorded"}</p></div></div>
+          <div class="block"><div class="blab">📝 Transcript</div>${d.transcript?`<div class="transcript"><p>${esc(d.transcript)}</p></div>`:`<div class="hookbox"><p class="empty">Transcript not available${d.caption?" — see caption below":""}</p></div>`}</div>
+          ${d.caption?`<div class="block" style="grid-column:1/-1"><div class="blab">💬 Caption</div><div class="transcript" style="max-height:150px"><p>${esc(d.caption)}</p></div></div>`:''}
+          <div class="dmetrics">
+            <div class="dm"><b class="tnum">${nf(d.views)}</b><i>Views</i></div>
+            <div class="dm"><b class="tnum">${fmtOutlier(d.outlier)}×</b><i>Outlier Score</i></div>
+            <div class="dm"><b class="tnum">${nf(d.comments)}</b><i>Comments</i></div>
+            <div class="dm"><b class="tnum">${nf(d.likes)}</b><i>Likes</i></div>
+            <div class="dm"><b class="tnum">${nf(d.followers)}</b><i>Followers</i></div>
+            <div class="dm"><b>${fmtDate(d.posted)}</b><i>Posted</i></div>
+          </div>
+          <div class="dlinks">
+            ${d.video_url?`<a class="lk watch" href="${esc(d.video_url)}" target="_blank" rel="noopener">▶ Watch video</a>`:''}
+            ${d.audio_url?`<a class="lk audio" href="${esc(d.audio_url)}" target="_blank" rel="noopener">♪ The audio</a>`:''}
+          </div>
+        </div>
+      </div></div></div>
+    </div>`;
+  }).join("");
+  bindRows();
+}
+function bindRows(){
+  document.querySelectorAll(".row").forEach(row=>{
+    const main=row.querySelector(".rowmain");
+    const toggle=()=>{ const open=row.classList.toggle("open"); main.setAttribute("aria-expanded",open); main.querySelector(".chev").style.transform=open?"rotate(180deg)":""; };
+    main.addEventListener("click",toggle);
+    main.addEventListener("keydown",e=>{ if(e.key==="Enter"||e.key===" "){e.preventDefault();toggle();}});
+  });
+}
+
+/* ---------- creators ---------- */
+function renderCreators(pool){
+  const box=$("#creators");
+  if(!pool.length){ box.innerHTML=`<div class="empty-state"><div class="big">🏁</div><h3>No creators yet</h3><p>No entries in this division for the ${windowLabel()}.</p></div>`; return; }
+  const map={};
+  pool.forEach(d=>{
+    const m=map[d.handle]||(map[d.handle]={handle:d.handle,videos:0,views:0,best:0,bestOut:0,followers:d.followers});
+    m.videos++; m.views+=d.views; m.best=Math.max(m.best,d.views); m.bestOut=Math.max(m.bestOut,d.outlier); m.followers=Math.max(m.followers,d.followers);
+  });
+  const list=Object.values(map).sort((a,b)=>b.views-a.views);
+  box.innerHTML = `<div class="colhead" style="grid-template-columns:52px 1fr 120px 82px 92px"><span>Rank</span><span>Creator</span><span class="r">Total views</span><span class="r">Videos</span><span class="r">Best outlier</span></div>`+
+  list.map((c,i)=>`<div class="crow${i===0?' lead':''}">
+      <div class="rank${i<3?' top3':''} tnum">${i+1}</div>
+      <div><div class="handle" style="font-weight:800;font-size:15px">@${esc(c.handle)}</div>
+        <div class="t" style="font-size:12px;color:var(--text-dim);margin-top:2px">${nf(c.followers)} followers · best video ${nf(c.best)} views</div></div>
+      <div class="cviews views-cell"><b class="tnum">${nf(c.views)}</b></div>
+      <div class="metric sm c-hide tnum" style="text-align:right">${c.videos}</div>
+      <div class="metric big c-hide" style="text-align:right"><span class="otag${c.bestOut>=3?' hot':''} tnum">${fmtOutlier(c.bestOut)}×</span></div>
+    </div>`).join("");
+}
+
+/* ---------- orchestration ---------- */
+function renderAll(){
+  const pool=currentPool(); rankPool(pool);
+  document.querySelectorAll(".divpill").forEach(p=>p.setAttribute("aria-selected",String(p.dataset.div===state.division)));
+  document.querySelectorAll("#winToggle button").forEach(b=>b.setAttribute("aria-selected",String(+b.dataset.days===state.days)));
+  renderStats(pool); renderDivbar(); renderPodium(pool); renderBoard(pool); renderCreators(pool);
+}
+function switchView(v){
+  state.view=v;
+  document.querySelectorAll(".tab").forEach(t=>t.setAttribute("aria-selected",String(t.dataset.view===v)));
+  $("#videosView").hidden = v!=="videos"; $("#creatorsView").hidden = v!=="creators";
+  $(".rightctl").style.visibility = v==="videos"?"visible":"hidden";
+}
+
+/* ---------- theme ---------- */
+function initTheme(){
+  const btn=$("#themeBtn");
+  const apply=t=>{ if(t==="system")document.documentElement.removeAttribute("data-theme"); else document.documentElement.setAttribute("data-theme",t);
+    const dark = t==="dark" || (t==="system" && matchMedia("(prefers-color-scheme:dark)").matches);
+    $("#themeIcon").textContent = dark?"☾":"☀"; $("#themeLabel").textContent = t.charAt(0).toUpperCase()+t.slice(1); };
+  let cur="system"; apply(cur);
+  btn.addEventListener("click",()=>{ cur = cur==="system"?"light":cur==="light"?"dark":"system"; apply(cur); });
+  matchMedia("(prefers-color-scheme:dark)").addEventListener("change",()=>{ if(cur==="system") apply("system"); });
+}
+
+/* ---------- wire ---------- */
+initTheme();
+renderHeaderStatic();
+renderAll();
+$("#winToggle").addEventListener("click",e=>{ const b=e.target.closest("button"); if(!b) return; state.days=+b.dataset.days; renderAll(); });
+$("#search").addEventListener("input",e=>{ state.q=e.target.value; renderBoard(currentPool()); });
+$("#sort").addEventListener("change",e=>{ state.sort=e.target.value; const p=currentPool(); rankPool(p); renderBoard(p); });
+document.querySelectorAll(".tab").forEach(t=>t.addEventListener("click",()=>switchView(t.dataset.view)));
+</script>
+</body>
+</html>
