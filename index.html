@@ -125,6 +125,7 @@
   select.srt{appearance:none;background:var(--surface);border:1px solid var(--border);color:var(--text);border-radius:10px;padding:9px 30px 9px 12px;font-size:13px;font-weight:600;cursor:pointer;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%238A93A2' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>");background-repeat:no-repeat;background-position:right 9px center}
 
   .board{display:flex;flex-direction:column;gap:7px}
+  .boardnote{font-family:var(--mono);font-size:11px;color:var(--text-faint);letter-spacing:.03em;padding:2px 4px 2px}
   .colhead{display:grid;grid-template-columns:52px 1fr 118px 92px 78px;gap:12px;padding:4px 16px;align-items:center}
   .colhead span{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--text-faint)}
   .colhead .r{text-align:right}
@@ -376,7 +377,8 @@ function renderBoard(pool){
   rows.sort((a,b)=>(b[state.sort]||0)-(a[state.sort]||0));
   if(!rows.length){ board.innerHTML=`<div class="empty-state"><div class="big">🔍</div><h3>No matches</h3><p>Nothing matches “${esc(state.q)}” in this view.</p></div>`; return; }
   const maxV = Math.max(...pool.map(d=>d.views));
-  board.innerHTML = rows.map(d=>{
+  const note = (!q && pool.length>rows.length) ? `<div class="boardnote">Showing the top ${rows.length} by views — ${pool.length} videos competing in the ${windowLabel()}</div>` : "";
+  board.innerHTML = note + rows.map(d=>{
     const isLead = d._rank===1;
     const barW = Math.max(2, Math.sqrt(d.views/maxV)*100);
     const hot = d.outlier>=3;
