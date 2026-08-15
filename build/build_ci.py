@@ -71,12 +71,15 @@ def pull():
             v = rich(p.get("Views")); posted = rich(p.get("Date & Time Posted"))
             if not isinstance(v, (int, float)) or v <= 0 or not posted: continue
             def n(x): return x if isinstance(x, (int, float)) else 0
+            foll = int(n(rich(p.get("Account Follower Count"))))
+            # Outlier Score = Views / Followers, recomputed from the (new) "Views" property.
+            # Notion's own Outlier Score formula still divides by the renamed "Audience Reached" field.
             rows.append({
                 "handle": rich(p.get("IG Username")) or "unknown",
                 "title": (rich(p.get("Video Title")) or "").strip(),
                 "views": int(v), "comments": int(n(rich(p.get("Comments")))),
-                "likes": int(n(rich(p.get("Likes")))), "outlier": round(n(rich(p.get("Outlier Score"))), 2),
-                "followers": int(n(rich(p.get("Account Follower Count")))),
+                "likes": int(n(rich(p.get("Likes")))), "outlier": round(int(v)/foll, 2) if foll else 0.0,
+                "followers": foll,
                 "video_url": rich(p.get("Video URL")) or "", "audio_url": rich(p.get("Audio URL")) or "",
                 "hook": (rich(p.get("Hook")) or "").strip(), "transcript": (rich(p.get("Script")) or "").strip(),
                 "caption": (rich(p.get("Caption")) or "").strip(),
