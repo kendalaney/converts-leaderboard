@@ -91,11 +91,14 @@ def pull():
 
 def main():
     rows = pull()
-    rows.sort(key=lambda x: -x["views"]); rows = rows[:100]
-    for i, c in enumerate(rows): c["rank"] = i + 1
     today = datetime.date.today()
     newest = max((datetime.date.fromisoformat(c["posted"]) for c in rows), default=today)
     ref = max(today, newest)
+    # Keep every video within the widest window (365d); the page ranks WITHIN the
+    # selected window and shows the top 100 there, so recent low-view posts stay visible.
+    rows = [c for c in rows if (ref - datetime.date.fromisoformat(c["posted"])).days <= 365]
+    rows.sort(key=lambda x: -x["views"])
+    for i, c in enumerate(rows): c["rank"] = i + 1
     html = (open(TEMPLATE).read()
             .replace("__DATA__", json.dumps(rows))
             .replace("__SNAPDATE__", today.strftime("%b %-d, %Y"))

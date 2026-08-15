@@ -369,7 +369,10 @@ function renderBoard(pool){
   const board=$("#board");
   if(!pool.length){ board.innerHTML=`<div class="empty-state"><div class="big">🏁</div><h3>Division open</h3><p>No videos here yet in the ${windowLabel()}. Be the first on the board.</p></div>`; return; }
   const q=state.q.trim().toLowerCase();
-  let rows=pool.filter(d=> !q || d.handle.toLowerCase().includes(q) || (d.hook||"").toLowerCase().includes(q) || (d.title||"").toLowerCase().includes(q));
+  // Rank within the current window: show the top 100 by views for this window+division.
+  // When searching, reach across the whole window pool so any video is findable.
+  const base = q ? pool : pool.slice().sort((a,b)=>b.views-a.views).slice(0,100);
+  let rows=base.filter(d=> !q || d.handle.toLowerCase().includes(q) || (d.hook||"").toLowerCase().includes(q) || (d.title||"").toLowerCase().includes(q));
   rows.sort((a,b)=>(b[state.sort]||0)-(a[state.sort]||0));
   if(!rows.length){ board.innerHTML=`<div class="empty-state"><div class="big">🔍</div><h3>No matches</h3><p>Nothing matches “${esc(state.q)}” in this view.</p></div>`; return; }
   const maxV = Math.max(...pool.map(d=>d.views));
