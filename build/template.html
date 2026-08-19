@@ -187,10 +187,23 @@
   .empty-state p{margin:0;font-size:13.5px}
 
   .creators{display:flex;flex-direction:column;gap:7px}
-  .crow{display:grid;grid-template-columns:52px 1fr 120px 82px 92px;gap:12px;align-items:center;background:var(--surface);border:1px solid var(--border);border-radius:13px;padding:14px 16px;box-shadow:var(--shadow)}
+  .crcap{font-size:12.5px;color:var(--text-dim);margin-bottom:2px}
+  .crcap b{color:var(--text)}
+  .beltkey{display:grid;grid-template-columns:repeat(9,1fr);gap:6px;background:var(--surface-2);border:1px solid var(--border);border-radius:12px;padding:10px;margin:6px 0 10px;overflow-x:auto}
+  .beltkey .bk{display:flex;flex-direction:column;align-items:center;gap:3px;text-align:center;min-width:60px}
+  .beltkey .bkt b{font-size:11px;font-weight:800;display:block;line-height:1.1}
+  .beltkey .bkt span{font-family:var(--mono);font-size:9.5px;color:var(--text-faint)}
+  @media(max-width:640px){.beltkey{grid-template-columns:repeat(9,minmax(58px,1fr))}}
+  .crow{display:grid;grid-template-columns:46px 1fr 120px 66px;gap:12px;align-items:center;background:var(--surface);border:1px solid var(--border);border-radius:13px;padding:12px 16px;box-shadow:var(--shadow)}
   .crow.lead{border-color:var(--gold-line)}
   .crow .cviews b{font-size:17px;font-weight:800;letter-spacing:-.02em}
-  @media(max-width:680px){.crow{grid-template-columns:42px 1fr 92px;row-gap:8px}.crow .c-hide{display:none}}
+  .cwrap{display:flex;align-items:center;gap:11px;min-width:0}
+  .cbelt{flex:none;width:36px;display:grid;place-items:center}
+  .cmeta{min-width:0}
+  .cmeta .handle{font-weight:800;font-size:15px;letter-spacing:-.01em}
+  .cmeta .csub{font-size:12px;color:var(--text-dim);margin-top:2px}
+  .cmeta .csub b{color:var(--text);font-weight:700}
+  @media(max-width:680px){.crow{grid-template-columns:38px 1fr auto;row-gap:6px}.crow .c-hide{display:none}}
 
   footer{margin-top:40px;padding-top:18px;border-top:1px solid var(--border);color:var(--text-faint);font-size:12px;display:flex;flex-wrap:wrap;gap:6px 18px;justify-content:space-between}
   footer .mono{font-family:var(--mono)}
@@ -272,9 +285,40 @@
 
 <script>
 const DATA = __DATA__;
+const CREATOR_TOTALS = __CREATOR_TOTALS__; // {handle:[lifetimeViews, videoCount]} — all-time, ignores window
 const SNAPSHOT_DATE = "__SNAPDATE__";
 const _SI = "__SNAPSHOT_ISO__".split("-").map(Number);
 const SNAP = new Date(_SI[0], _SI[1]-1, _SI[2]);
+
+/* ---------- Belt ranks: earned by LIFETIME total views ---------- */
+const BELTS = [
+  {n:1,name:"White",  req:0,        c1:"#FFFFFF",c2:"#E2E6EC"},
+  {n:2,name:"Yellow", req:10000,    c1:"#F6D451",c2:"#E3B308"},
+  {n:3,name:"Orange", req:50000,    c1:"#F7A85C",c2:"#E27C1C"},
+  {n:4,name:"Green",  req:100000,   c1:"#5BC066",c2:"#2E9E3C"},
+  {n:5,name:"Blue",   req:300000,   c1:"#4F97DE",c2:"#2E6FB6"},
+  {n:6,name:"Purple", req:750000,   c1:"#9C74D8",c2:"#6E45B0"},
+  {n:7,name:"Brown",  req:2000000,  c1:"#9C6238",c2:"#6E4423"},
+  {n:8,name:"Red",    req:5000000,  c1:"#D44C3D",c2:"#A62B20"},
+  {n:9,name:"Black",  req:10000000, c1:"#33333A",c2:"#131318"},
+];
+const beltOf = v => { let b=BELTS[0]; for(const x of BELTS) if(v>=x.req) b=x; return b; };
+function beltSVG(lv,size){
+  const L=BELTS[lv-1], g="be"+lv+"_"+size;
+  const stroke = lv===1 ? "rgba(120,130,145,.6)" : "rgba(0,0,0,.22)";
+  const glow = lv===9 ? `<rect x="1.2" y="13.6" width="45.6" height="13.4" rx="4" fill="none" stroke="#F2C14E" stroke-width="1.1" opacity=".55"/>`:"";
+  const dan  = lv===9 ? `<rect x="26" y="27" width="3.8" height="11.5" rx="1.2" fill="#F2C14E"/>`:"";
+  return `<svg width="${size}" height="${Math.round(size*0.82)}" viewBox="0 0 48 40" aria-hidden="true">
+   <defs><linearGradient id="${g}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${L.c1}"/><stop offset="1" stop-color="${L.c2}"/></linearGradient></defs>
+   ${glow}
+   <rect x="2" y="15.5" width="21.5" height="10" rx="2.6" fill="url(#${g})" stroke="${stroke}" stroke-width="1"/>
+   <rect x="24.5" y="15.5" width="21.5" height="10" rx="2.6" fill="url(#${g})" stroke="${stroke}" stroke-width="1"/>
+   <rect x="18.6" y="26" width="4.7" height="12.5" rx="1.4" fill="url(#${g})" stroke="${stroke}" stroke-width="1"/>
+   <rect x="24.7" y="26" width="4.7" height="12.5" rx="1.4" fill="url(#${g})" stroke="${stroke}" stroke-width="1"/>
+   ${dan}
+   <rect x="17.4" y="12.6" width="13.2" height="16" rx="3" fill="${L.c2}" stroke="${stroke}" stroke-width="1"/>
+   <rect x="17.4" y="12.6" width="13.2" height="7.5" rx="3" fill="${L.c1}" opacity=".45"/></svg>`;
+}
 
 const DIVISIONS = [
   {id:"all",          label:"All Divisions", emoji:"🏆"},
@@ -429,24 +473,30 @@ function bindRows(){
 }
 
 /* ---------- creators ---------- */
-function renderCreators(pool){
+function renderCreators(){
   const box=$("#creators");
-  if(!pool.length){ box.innerHTML=`<div class="empty-state"><div class="big">🏁</div><h3>No creators yet</h3><p>No entries in this division for the ${windowLabel()}.</p></div>`; return; }
-  const map={};
-  pool.forEach(d=>{
-    const m=map[d.handle]||(map[d.handle]={handle:d.handle,videos:0,views:0,best:0,bestOut:0,followers:d.followers});
-    m.videos++; m.views+=d.views; m.best=Math.max(m.best,d.views); m.bestOut=Math.max(m.bestOut,d.outlier); m.followers=Math.max(m.followers,d.followers);
-  });
-  const list=Object.values(map).sort((a,b)=>b.views-a.views);
-  box.innerHTML = `<div class="colhead" style="grid-template-columns:52px 1fr 120px 82px 92px"><span>Rank</span><span>Creator</span><span class="r">Total views</span><span class="r">Videos</span><span class="r">Best outlier</span></div>`+
-  list.map((c,i)=>`<div class="crow${i===0?' lead':''}">
+  // All-time standings from lifetime totals — independent of the window/division filters.
+  const list=Object.entries(CREATOR_TOTALS).map(([handle,[views,videos]])=>({handle,views,videos}))
+    .filter(c=>c.views>0).sort((a,b)=>b.views-a.views);
+  // belt legend / key
+  const counts={}; list.forEach(c=>{const b=beltOf(c.views).n; counts[b]=(counts[b]||0)+1;});
+  const legend = `<div class="beltkey">`+BELTS.map(b=>`<div class="bk" title="${b.name} Belt — ${b.req===0?'0':nf(b.req)}+ lifetime views">
+      ${beltSVG(b.n,30)}<div class="bkt"><b>${b.name}</b><span>${b.req===0?'0':compact(b.req)}+ · ${counts[b.n]||0}</span></div></div>`).join("")+`</div>`;
+  const caption=`<div class="crcap">All-time standings · belts earned by <b>total lifetime views</b> (not affected by the time or division filters above)</div>`;
+  const head=`<div class="colhead" style="grid-template-columns:46px 1fr 120px 66px"><span>Rank</span><span>Creator &amp; Belt</span><span class="r">Lifetime views</span><span class="r">Videos</span></div>`;
+  const rows=list.map((c,i)=>{
+    const b=beltOf(c.views), next=BELTS[b.n]; // next belt or undefined at Black
+    const toNext = next? next.req-c.views : 0;
+    const sub = next? `${b.name} Belt · <b class="tnum">${compact(toNext)}</b> to ${next.name}` : `${b.name} Belt · top rank`;
+    return `<div class="crow${i===0?' lead':''}">
       <div class="rank${i<3?' top3':''} tnum">${i+1}</div>
-      <div><div class="handle" style="font-weight:800;font-size:15px">@${esc(c.handle)}</div>
-        <div class="t" style="font-size:12px;color:var(--text-dim);margin-top:2px">${nf(c.followers)} followers · best video ${nf(c.best)} views</div></div>
+      <div class="cwrap"><span class="cbelt">${beltSVG(b.n,34)}</span>
+        <div class="cmeta"><div class="handle">@${esc(c.handle)}</div><div class="csub">${sub}</div></div></div>
       <div class="cviews views-cell"><b class="tnum">${nf(c.views)}</b></div>
       <div class="metric sm c-hide tnum" style="text-align:right">${c.videos}</div>
-      <div class="metric big c-hide" style="text-align:right"><span class="otag${c.bestOut>=3?' hot':''} tnum">${fmtOutlier(c.bestOut)}×</span></div>
-    </div>`).join("");
+    </div>`;
+  }).join("");
+  box.innerHTML = caption + legend + head + rows;
 }
 
 /* ---------- orchestration ---------- */
@@ -454,7 +504,7 @@ function renderAll(){
   const pool=currentPool(); rankPool(pool);
   document.querySelectorAll(".divpill").forEach(p=>p.setAttribute("aria-selected",String(p.dataset.div===state.division)));
   document.querySelectorAll("#winToggle button").forEach(b=>b.setAttribute("aria-selected",String(+b.dataset.days===state.days)));
-  renderStats(pool); renderDivbar(); renderPodium(pool); renderBoard(pool); renderCreators(pool);
+  renderStats(pool); renderDivbar(); renderPodium(pool); renderBoard(pool); renderCreators();
 }
 function switchView(v){
   state.view=v;

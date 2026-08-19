@@ -95,6 +95,10 @@ def pull():
 def main():
     rows = pull()
     today = datetime.date.today()
+    # Lifetime creator totals (all-time, every video) -> {handle:[views, videoCount]}. Powers belt ranks.
+    ct = {}
+    for c in rows:
+        e = ct.setdefault(c["handle"], [0, 0]); e[0] += c["views"]; e[1] += 1
     newest = max((datetime.date.fromisoformat(c["posted"]) for c in rows), default=today)
     ref = max(today, newest)
     # Keep every video within the widest window (365d); the page ranks WITHIN the
@@ -104,9 +108,10 @@ def main():
     for i, c in enumerate(rows): c["rank"] = i + 1
     html = (open(TEMPLATE).read()
             .replace("__DATA__", json.dumps(rows))
+            .replace("__CREATOR_TOTALS__", json.dumps(ct))
             .replace("__SNAPDATE__", today.strftime("%b %-d, %Y"))
             .replace("__SNAPSHOT_ISO__", ref.isoformat()))
-    if "__DATA__" in html or "__SNAPSHOT_ISO__" in html:
+    if "__DATA__" in html or "__SNAPSHOT_ISO__" in html or "__CREATOR_TOTALS__" in html:
         sys.exit("template placeholders not fully replaced")
     open(OUT, "w").write(html)
     print(f"Built {len(rows)} videos from {DB} (snapshot {today}).")
