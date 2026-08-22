@@ -416,7 +416,6 @@ function beltSVG(lv,size){
   const dan  = lv===9 ? `<rect x="26" y="27" width="3.8" height="11.5" rx="1.2" fill="#F2C14E"/>`:"";
   return `<svg width="${size}" height="${Math.round(size*0.82)}" viewBox="0 0 48 40" aria-hidden="true">
    <defs><linearGradient id="${g}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${L.c1}"/><stop offset="1" stop-color="${L.c2}"/></linearGradient></defs>
-   <rect x="0" y="9.5" width="48" height="30" fill="#DED4C8"/>
    ${glow}
    <rect x="2" y="15.5" width="21.5" height="10" rx="2.6" fill="url(#${g})" stroke="${stroke}" stroke-width="1"/>
    <rect x="24.5" y="15.5" width="21.5" height="10" rx="2.6" fill="url(#${g})" stroke="${stroke}" stroke-width="1"/>
