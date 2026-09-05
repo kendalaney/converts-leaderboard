@@ -415,6 +415,16 @@ select.srt{
 @media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
 
+<style>
+/* When this page is framed inside the asset library, that site supplies
+   the header and the navigation, so this one stands down to avoid two
+   stacked headers. Standalone it is untouched. */
+html.is-embedded .site-header { display: none; }
+html.is-embedded main, html.is-embedded body { padding-top: 0; }
+</style>
+<script>
+  if (window.top !== window.self) document.documentElement.classList.add("is-embedded");
+</script>
 </head>
 <body>
 
