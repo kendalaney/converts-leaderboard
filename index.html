@@ -422,6 +422,162 @@ select.srt{
 html.is-embedded .site-header { display: none; }
 html.is-embedded main, html.is-embedded body { padding-top: 0; }
 </style>
+<style>
+/* ==================================================================
+   LIQUID GLASS
+   The same material layer as the asset library. The page, hero and
+   section backgrounds stay exactly as above, and nothing here adds a
+   gradient (the leader veils on the podium and the top rows are the
+   originals). Only the things that sit on those backgrounds change:
+   panels, tiles, segmented controls, fields and buttons.
+   Glass is a translucent fill with blur, a lit inset top edge and a
+   soft shadow that grows with the size of the surface.
+   ================================================================== */
+:root{
+  --glass-fill:rgba(255,255,255,.58);
+  --glass-fill-strong:rgba(255,255,255,.78);
+  --glass-fill-hover:rgba(255,255,255,.86);
+  --glass-stroke:rgba(36,26,21,.10);
+  --glass-stroke-strong:rgba(36,26,21,.18);
+  --glass-edge:inset 0 1px 0 rgba(255,255,255,.9),inset 0 0 0 1px rgba(255,255,255,.35);
+  --glass-blur:blur(22px) saturate(180%);
+  --glass-shadow-sm:0 1px 2px rgba(19,13,9,.05),0 2px 8px rgba(19,13,9,.05);
+  --glass-shadow-md:0 1px 2px rgba(19,13,9,.05),0 10px 28px rgba(19,13,9,.08);
+  --glass-dark:rgba(69,57,48,.92);
+  --glass-dark-hover:rgba(36,26,21,.94);
+  --glass-dark-edge:inset 0 1px 0 rgba(255,255,255,.22);
+  --glass-dark-fg:var(--cream);
+  --r-lg:20px;--r-md:14px;--r-pill:999px;
+  --spring:cubic-bezier(.22,1,.36,1);
+}
+/* Dark glass: a faint white film on black, lit by a thin top edge. */
+:root[data-theme="dark"]{
+  --glass-fill:rgba(255,255,255,.045);
+  --glass-fill-strong:rgba(255,255,255,.07);
+  --glass-fill-hover:rgba(255,255,255,.09);
+  --glass-stroke:rgba(255,255,255,.14);
+  --glass-stroke-strong:rgba(255,255,255,.26);
+  --glass-edge:inset 0 1px 0 rgba(255,255,255,.14);
+  --glass-shadow-sm:0 2px 8px rgba(0,0,0,.4);
+  --glass-shadow-md:0 12px 32px rgba(0,0,0,.5);
+  --glass-dark:#ffffff;
+  --glass-dark-hover:#e6e6e6;
+  --glass-dark-edge:inset 0 -1px 0 rgba(0,0,0,.12);
+  --glass-dark-fg:#000;
+}
+
+/* ---------- header ---------- */
+.site-header{
+  -webkit-backdrop-filter:var(--glass-blur);backdrop-filter:var(--glass-blur);
+  border-bottom-color:var(--glass-stroke);
+  box-shadow:inset 0 -1px 0 rgba(255,255,255,.6),0 6px 20px rgba(19,13,9,.04);
+}
+:root[data-theme="dark"] .site-header{box-shadow:none}
+.nav a,.nav button{
+  padding:.35rem .8rem;margin:0 -.8rem;border-bottom:0;border-radius:var(--r-pill);
+  transition:color .2s var(--ease),background-color .2s var(--ease),box-shadow .2s var(--ease);
+}
+.nav a:hover,.nav a.active,.nav button:hover{
+  background:var(--glass-fill);box-shadow:var(--glass-edge),var(--glass-shadow-sm);
+}
+
+/* ---------- glass panels ----------
+   The joined grids (stats, podium) open into separate glass tiles; the
+   long lists (board, creators) become one rounded glass panel each. */
+.stats,.podium{gap:clamp(.7rem,1.5vw,1rem);background:none;border:0}
+.stat,.pod,
+.board,.creators,.empty-state{
+  background:var(--glass-fill);
+  -webkit-backdrop-filter:var(--glass-blur);backdrop-filter:var(--glass-blur);
+  border:1px solid var(--glass-stroke);border-radius:var(--r-lg);
+  box-shadow:var(--glass-edge),var(--glass-shadow-md);
+}
+.board,.creators,.pod{overflow:hidden}
+/* The leader keeps its original veil, now laid over the glass. */
+.pod.g1{background:linear-gradient(180deg,var(--lead-veil),transparent 62%),var(--glass-fill)}
+.pod{transition:background-color .25s var(--ease),transform .35s var(--spring),box-shadow .35s var(--spring)}
+.pod:hover{
+  background-color:var(--glass-fill-hover);transform:translateY(-2px);
+  box-shadow:var(--glass-edge),0 2px 6px rgba(19,13,9,.06),0 18px 40px rgba(19,13,9,.12);
+}
+:root[data-theme="dark"] .pod:hover{box-shadow:var(--glass-edge),0 18px 40px rgba(0,0,0,.6)}
+
+/* Joined strips stay joined: rounded, with depth, cells unchanged. */
+.beltkey,.dmetrics{border-radius:var(--r-md);box-shadow:var(--glass-shadow-sm)}
+.dmetrics{overflow:hidden}
+.beltkey .bk,.dm{background:var(--glass-fill-strong)}
+:root[data-theme="dark"] .beltkey .bk,:root[data-theme="dark"] .dm{background:#000}
+
+.hookbox{border-radius:0 var(--r-md) var(--r-md) 0}
+.barwrap,.barfill{border-radius:var(--r-pill)}
+.medal{box-shadow:var(--glass-edge)}
+.transcript{border-radius:var(--r-md)}
+.boardnote{border-bottom-color:var(--glass-stroke)}
+
+/* ---------- segmented controls ----------
+   Window, division and view switches become glass capsules with the
+   chosen option as a solid pill inside. */
+.segmented,.divbar,.tabs{
+  border-radius:var(--r-pill);padding:4px;gap:2px;
+  background:var(--glass-fill);border:1px solid var(--glass-stroke-strong);
+  -webkit-backdrop-filter:var(--glass-blur);backdrop-filter:var(--glass-blur);
+  box-shadow:var(--glass-edge),var(--glass-shadow-sm);
+}
+.segmented button,.divpill,.tab{
+  border-right:0;border-radius:var(--r-pill);
+  transition:background-color .25s var(--spring),color .2s var(--ease),box-shadow .25s var(--ease),transform .25s var(--spring);
+}
+.segmented button:hover,.divpill:hover,.tab:hover{background:var(--glass-fill-hover)}
+.segmented button[aria-selected="true"],.divpill[aria-selected="true"],.tab[aria-selected="true"]{
+  background:var(--glass-dark);color:var(--glass-dark-fg);
+  box-shadow:var(--glass-dark-edge),0 4px 12px rgba(19,13,9,.16);
+}
+.segmented button:active,.divpill:active,.tab:active{transform:scale(.96);transition-duration:.1s}
+.divpill[aria-selected="true"] .cnt{color:var(--glass-dark-fg)}
+
+/* ---------- chips ---------- */
+.pod .divtag,.fmt,.trg{border-radius:var(--r-pill)}
+
+/* ---------- fields ---------- */
+.search-wrap input,select.srt{
+  border-radius:var(--r-md);background-color:var(--glass-fill-strong);border-color:var(--glass-stroke-strong);
+  -webkit-backdrop-filter:var(--glass-blur);backdrop-filter:var(--glass-blur);
+  box-shadow:inset 0 1px 2px rgba(19,13,9,.06);
+  transition:border-color .2s var(--ease),box-shadow .2s var(--ease),background-color .2s var(--ease);
+}
+.search-wrap input:focus{
+  background-color:var(--panel);border-color:var(--brass);
+  box-shadow:inset 0 1px 2px rgba(19,13,9,.04),0 0 0 4px var(--wash-strong);
+}
+
+/* ---------- buttons ---------- */
+.btn{
+  border-radius:var(--r-pill);background:var(--glass-dark);border-color:transparent;color:var(--glass-dark-fg);
+  box-shadow:var(--glass-dark-edge),0 1px 2px rgba(19,13,9,.12),0 6px 16px rgba(19,13,9,.14);
+  transition:background-color .2s var(--ease),color .2s var(--ease),box-shadow .2s var(--ease),transform .25s var(--spring);
+}
+.btn:hover,:root[data-theme="dark"] .btn:hover{background:var(--glass-dark-hover);border-color:transparent;color:var(--glass-dark-fg)}
+:root[data-theme="dark"] .btn{background:var(--glass-dark);border-color:transparent;color:var(--glass-dark-fg)}
+.btn.ghost,:root[data-theme="dark"] .btn.ghost{
+  background:var(--glass-fill);color:var(--ink);border-color:var(--glass-stroke-strong);
+  box-shadow:var(--glass-edge),var(--glass-shadow-sm);
+}
+.btn.ghost:hover,:root[data-theme="dark"] .btn.ghost:hover{background:var(--glass-fill-hover);color:var(--ink);border-color:var(--hair-strong)}
+.btn:active{transform:scale(.97);transition-duration:.1s}
+
+/* ---------- preferences ---------- */
+@media(prefers-reduced-motion:reduce){.pod:hover,.btn:active,.segmented button:active,.divpill:active,.tab:active{transform:none}}
+@media(prefers-reduced-transparency:reduce){
+  :root{--glass-fill:#fff;--glass-fill-strong:#fff;--glass-fill-hover:#fff}
+  :root[data-theme="dark"]{--glass-fill:#000;--glass-fill-strong:#0b0b0b;--glass-fill-hover:#111}
+  .site-header,.stat,.pod,.board,.creators,.empty-state,.segmented,.divbar,.tabs,.search-wrap input,select.srt{
+    -webkit-backdrop-filter:none;backdrop-filter:none;
+  }
+}
+@media(prefers-contrast:more){
+  :root{--glass-fill:#fff;--glass-fill-strong:#fff;--glass-fill-hover:#fff;--glass-stroke:var(--hair-strong);--glass-stroke-strong:var(--ink)}
+}
+</style>
 <script>
   if (window.top !== window.self) document.documentElement.classList.add("is-embedded");
 </script>
