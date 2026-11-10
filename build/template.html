@@ -567,6 +567,20 @@ html.is-embedded main, html.is-embedded body { padding-top: 0; }
 .btn.ghost:hover,:root[data-theme="dark"] .btn.ghost:hover{background:var(--glass-fill-hover);color:var(--ink);border-color:var(--hair-strong)}
 .btn:active{transform:scale(.97);transition-duration:.1s}
 
+/* ---------- iphone ----------
+   Safari zooms into any field under 16px when it is tapped, so the
+   search and sort hold 16px on a phone. A phone has no hover, so the
+   podium lift never sticks after a tap. Edges clear the notch. */
+@media(max-width:720px),(pointer:coarse){.search-wrap input,select.srt{font-size:16px}select.srt{letter-spacing:.06em}}
+@media(hover:none){.pod:hover{transform:none;background-color:var(--glass-fill)}}
+/* The section headings carried a no-wrap hint ("Ranked by views") that
+   pushed the page 65px past a phone screen, so Safari zoomed the whole
+   page out to fit it. On a phone the hint drops under the heading. */
+@media(max-width:720px){.section-label{flex-wrap:wrap;row-gap:.35rem}.section-label h2{white-space:normal;flex-wrap:wrap}.section-label .line{display:none}.section-label .hint{flex-basis:100%;white-space:normal}}
+/* Search gets the whole row on a phone; sort sits under it. */
+@media(max-width:720px){.rightctl{gap:.6rem}.search-wrap{flex:1 1 100%}.sortsel{flex:1 1 100%}.sortsel select.srt{flex:1}}
+.shell{padding-left:max(var(--pad),env(safe-area-inset-left));padding-right:max(var(--pad),env(safe-area-inset-right))}
+
 /* ---------- preferences ---------- */
 @media(prefers-reduced-motion:reduce){.pod:hover,.btn:active,.segmented button:active,.divpill:active,.tab:active{transform:none}}
 @media(prefers-reduced-transparency:reduce){
