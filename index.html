@@ -534,6 +534,8 @@ html.is-embedded main, html.is-embedded body { padding-top: 0; }
 }
 .segmented button:active,.divpill:active,.tab:active{transform:scale(.96);transition-duration:.1s}
 .divpill[aria-selected="true"] .cnt{color:var(--glass-dark-fg)}
+/* A phone fits all four windows on one line inside the capsule. */
+@media(max-width:720px){.segmented{max-width:100%}.segmented button{padding:.6rem .75rem;font-size:10.5px;letter-spacing:.08em}}
 
 /* ---------- chips ---------- */
 .pod .divtag,.fmt,.trg{border-radius:var(--r-pill)}
